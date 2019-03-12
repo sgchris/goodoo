@@ -1,13 +1,16 @@
 import React, {Component} from 'react';
-
+import { createStore } from "redux";
 
 const todoReducer = (state = [], action) => {
+    
     switch (action.type) {
         case 'TODO_ADD': 
+            const maxId = state.reduce((currentMax, todo) => Math.max(currentMax, todo.id), 0);
+            console.log('maxid', maxId);
             return [
                 ...state,
                 {
-                    id: action.id,
+                    id: maxId + 1,
                     text: action.text,
                     completed: false
                 }
@@ -32,30 +35,36 @@ const todoReducer = (state = [], action) => {
 
 class List extends Component {
     
+    store = createStore(todoReducer);
+    
+    constructor(props) {
+        super(props);
+        this.loadItems();
+    }
     
     loadItems() {
-        this.setState(ps => {
-            // return static content
-            return {
-                items: [{
-                    id: 1,
-                    content: 'todo item'
-                },{
-                    id: 2,
-                    content: 'another todo item'
-                }]
-            };
+        // temporary set static data
+        this.store.dispatch({
+            type: 'TODO_ADD',
+            text: 'todo action'
         });
+        this.store.dispatch({
+            type: 'TODO_ADD',
+            text: 'another todo item'
+        });
+        
     }
     
     render() {
-        loadItems();
+        const liItems = this.store.getState().map(todoItem => {
+            return (
+                <li className="collection-item">{todoItem.text}</li>
+            );
+        })
         
         return (
             <ul className="collection">
-                <li className="collection-item">
-                    some item
-                </li>
+            {liItems}
             </ul>
         )
     }

@@ -1,44 +1,14 @@
 import React, {Component} from 'react';
-import { createStore } from "redux";
-
-const todoReducer = (state = [], action) => {
-    
-    switch (action.type) {
-        case 'TODO_ADD': 
-            const maxId = state.reduce((currentMax, todo) => Math.max(currentMax, todo.id), 0);
-            console.log('maxid', maxId);
-            return [
-                ...state,
-                {
-                    id: maxId + 1,
-                    text: action.text,
-                    completed: false
-                }
-            ];
-        case 'TODO_REMOVE': 
-            return state.filter(todo => {
-                return (todo.id != action.id);
-            });
-        case 'TODO_MARK_COMPLETE': 
-            return state.map(todo => {
-                if (todo.id == action.id) {
-                    todo.completed = true;
-                }
-                
-                return todo;
-            });
-        default: 
-            return state;
-    }
-}
-
+import { createStore } from 'redux';
+import axios from 'axios';
+import todoReducer from '../Reducers/Todo';
 
 class List extends Component {
     
-    store = createStore(todoReducer);
     
     constructor(props) {
         super(props);
+        this.store = createStore(todoReducer);
         this.loadItems();
     }
     
@@ -52,7 +22,13 @@ class List extends Component {
             type: 'TODO_ADD',
             text: 'another todo item'
         });
-        
+    }
+    
+    addItem(text) {
+        this.store.dispatch({
+            type: 'TODO_ADD',
+            text
+        });
     }
     
     render() {
@@ -64,7 +40,16 @@ class List extends Component {
         
         return (
             <ul className="collection">
-            {liItems}
+                <li className="collection-item">
+                    <form className="row">
+                        <div classname="input-group">
+                            <input type="text" id="new_todo_item" />
+                            <label for="new_todo_item">New TODO item</label>
+                            <button type="submit" className="waves-effect waves-light btn">Add</button>
+                        </div>
+                    </form>
+                </li>
+                {liItems}
             </ul>
         )
     }

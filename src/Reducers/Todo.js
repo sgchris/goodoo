@@ -3,7 +3,6 @@ const todoReducer = (state = [], action) => {
     switch (action.type) {
         case 'TODO_ADD': 
             const maxId = state.reduce((currentMax, todo) => Math.max(currentMax, todo.id), 0);
-            console.log('maxid', maxId);
             return [
                 ...state,
                 {
@@ -14,11 +13,11 @@ const todoReducer = (state = [], action) => {
             ];
         case 'TODO_REMOVE': 
             return state.filter(todo => {
-                return (todo.id != action.id);
+                return (todo.id !== action.id);
             });
         case 'TODO_MARK_COMPLETE': 
             return state.map(todo => {
-                if (todo.id == action.id) {
+                if (todo.id === action.id) {
                     todo.completed = true;
                 }
                 
@@ -26,7 +25,7 @@ const todoReducer = (state = [], action) => {
             });
         case 'TODO_MARK_IN_PROGRESS': 
             return state.map(item => {
-                if (item.id == action.id) {
+                if (item.id === action.id) {
                     item.inProgress = true;
                 }
 
@@ -34,7 +33,7 @@ const todoReducer = (state = [], action) => {
             });
         case 'TODO_UNMARK_IN_PROGRESS': 
             return state.map(item => {
-                if (item.id == action.id) {
+                if (item.id === action.id) {
                     item.inProgress = false;
                 }
 

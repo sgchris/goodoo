@@ -9,8 +9,8 @@ class Navbar extends Component {
                     &nbsp;<small>Todo using Google Tasks API</small>
                     </a>
                     <ul id="nav-mobile" className="right hide-on-med-and-down">
-                        <li><a href="https://github.com/sgchris" target="_blank">GitHub</a></li>
-                        <li><a href="https://developers.google.com/tasks/" target="_blank">Google Tasks API</a></li>
+                        <li><a href="https://github.com/sgchris" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+                        <li><a href="https://developers.google.com/tasks/" target="_blank" rel="noopener noreferrer">Google Tasks API</a></li>
                     </ul>
                 </div>
             </nav>

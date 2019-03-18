@@ -10,6 +10,8 @@ class List extends Component {
         super(props);
         this.store = createStore(todoReducer);
         this.loadItems();
+
+        this.addItem = this.addItem.bind(this);
     }
     
     loadItems() {
@@ -24,32 +26,43 @@ class List extends Component {
         });
     }
     
-    addItem(text) {
+    addItem(event) {
         this.store.dispatch({
-            type: 'TODO_ADD',
-            text
+            type: 'TODO_MARK_IN_PROGRESS'
         });
+        event.preventDefault();
+        
+        const text = event.target.new_todo_item.value;
+        const currentStore = this.store;
+        axios.post('https://jsonplaceholder.typicode.com/todos', {
+            text
+        }).then(() => {
+            currentStore.dispatch({
+                type: 'TODO_ADD',
+                text
+            });
+        }).finally(() => {
+            currentStore.dispatch({
+                type: 'TODO_UNMARK_IN_PROGRESS'
+            });
+        })
     }
     
     render() {
         const liItems = this.store.getState().map(todoItem => {
             return (
-                <li className="collection-item">{todoItem.text}</li>
+                <li key={'todoitem-' + todoItem.id} className="collection-item">{todoItem.text}</li>
             );
         })
 
-        const addButtonStyle = {
-            width: '100%'
-        };
-        
         return (
             <ul className="collection">
-                <li className="collection-item">
-                    <form>
+                <li key="new-todo-item" className="collection-item">
+                    <form onSubmit={this.addItem}>
                         <div className="row">
                             <div className="input-field col m10 s12">
                                 <input type="text" id="new_todo_item" />
-                                <label for="new_todo_item">New todo item</label>
+                                <label htmlFor="new_todo_item">New todo item</label>
                             </div>
                             <div className="input-field col m2 s12">
                                 <button type="submit" className="waves-effect waves-light btn" style={{width: '100%'}}>Add <i className="material-icons right">send</i></button>

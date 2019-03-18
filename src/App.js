@@ -7,10 +7,14 @@ import List from './Components/List'
 class App extends Component {
   render() {
     return (
+      <div>
         <div>
             <Navbar></Navbar>
+        </div>
+        <div className="container">
             <List></List>
         </div>
+      </div>
     );
   }
 }

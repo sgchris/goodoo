@@ -37,15 +37,23 @@ class List extends Component {
                 <li className="collection-item">{todoItem.text}</li>
             );
         })
+
+        const addButtonStyle = {
+            width: '100%'
+        };
         
         return (
             <ul className="collection">
                 <li className="collection-item">
-                    <form className="row">
-                        <div classname="input-group">
-                            <input type="text" id="new_todo_item" />
-                            <label for="new_todo_item">New TODO item</label>
-                            <button type="submit" className="waves-effect waves-light btn">Add</button>
+                    <form>
+                        <div className="row">
+                            <div className="input-field col m10 s12">
+                                <input type="text" id="new_todo_item" />
+                                <label for="new_todo_item">New todo item</label>
+                            </div>
+                            <div className="input-field col m2 s12">
+                                <button type="submit" className="waves-effect waves-light btn" style={{width: '100%'}}>Add <i className="material-icons right">send</i></button>
+                            </div>
                         </div>
                     </form>
                 </li>

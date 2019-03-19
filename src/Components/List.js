@@ -30,6 +30,19 @@ class List extends Component {
         this.store.dispatch({
             type: 'TODO_MARK_IN_PROGRESS'
         });
+
+        axios.post('http://api.goodoo.co/todos', {
+            text
+        }).then(() => {
+            this.store.dispatch({
+                type: 'TODO_ADD',
+                text
+            });
+        }).finally(() => {
+            this.store.dispatch({
+                type: 'TODO_UNMARK_IN_PROGRESS'
+            });
+        });
         event.preventDefault();
         
         const text = event.target.new_todo_item.value;

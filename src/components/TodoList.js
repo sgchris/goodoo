@@ -1,6 +1,9 @@
 import React, { Component } from 'react'
+import { AuthConsumer } from './../services/Auth';
+
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
+
 
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -21,10 +24,6 @@ class TodoList extends Component {
         tasks: [],
     };
 
-    constructor(props) {
-        super(props)
-    }
-    
     componentDidMount() {
         // get list of tasks folders
         this.waitForGoogleApi(this.getFolders);
@@ -36,7 +35,7 @@ class TodoList extends Component {
         if (typeof(window.gapi) == 'undefined') {
             setTimeout(() => {
                 console.log('waiting for google api script');
-                this.waitForGoogleApi(callbackFn);
+                that.waitForGoogleApi(callbackFn);
             }, 500);
         } else { 
             const bindCallbackFn = callbackFn.bind(this);
@@ -87,28 +86,32 @@ class TodoList extends Component {
 
     render() {
         return (
-            <div>
-                <div>
-                    <TextField style={{padding: 24}}
-                        id="searchInput"
-                        placeholder="Search for tasks"   
-                        margin="normal"
-                        onChange={this.onSearchInputChange}
-                        />
-                    <Grid container spacing={24} style={{padding: 24}}>
-                        <List>
-                        { this.state.folders.map(folder => (
-                            <ListItem key={folder.id}>
-                                <Avatar>
-                                    <WorkIcon />
-                                </Avatar>
-                                <ListItemText primary={folder.name} secondary={ 'ID ' + folder.id } />
-                            </ListItem>
-                        ))}
-                        </List>
-                    </Grid>
-                </div>
-            </div>
+            <AuthConsumer>{
+                authObj => {
+                    return <div>
+                        <TextField style={{padding: 24}}
+                            id="searchInput"
+                            placeholder="Search for tasks"   
+                            margin="normal"
+                            onChange={this.onSearchInputChange}
+                            />
+                        <Grid container spacing={24} style={{padding: 24}}>
+                            <List>
+                                <ListItem key="000">{authObj.authName}</ListItem>
+                            { this.state.folders.map(folder => (
+                                <ListItem key={folder.id}>
+                                    <Avatar>
+                                        <WorkIcon />
+                                    </Avatar>
+                                    <ListItemText primary={folder.name} secondary={ 'ID ' + folder.id } />
+                                </ListItem>
+                            ))}
+                            </List>
+                        </Grid>
+                    </div>
+                }
+            }
+            </AuthConsumer>
         )
     }
 }

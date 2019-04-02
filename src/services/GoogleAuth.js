@@ -1,10 +1,10 @@
-import React from 'react'
-
+//import React from 'react'
 const API_KEY = 'AIzaSyBHW8c_z5Q2DgA8vdP7fA8XI7LlgsvDiMY';
 const CLIENT_ID = '710244711285-m1ioc2b9c3aoi9n0v69jacf5aaoct0l0.apps.googleusercontent.com';
 const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/tasks/v1/rest"];
 const SCOPES = "https://www.googleapis.com/auth/tasks";
-// const CLIENT_SECRET = 'AL7LY7OOPfa225aEUwoILuxx';
+
+const GAPI_SCRIPT_URL = "https://apis.google.com/js/api.js";
 
 class GoogleAuth {
     
@@ -13,6 +13,10 @@ class GoogleAuth {
 
     // "init" method was called
     objectInitialized = false;
+
+    currentUser = null;
+
+    numberOfAttemptsToLoadGapiScript = 20;
 
     // wait for google API to load (the script tag to finish loading)
     async _withGoogleApi(callbackFn) {
@@ -24,19 +28,26 @@ class GoogleAuth {
             // check if the script is in the doc
             if (!that.googleApiScriptLoaded) {
                 let gapiScriptTag = document.createElement('script');
-                gapiScriptTag.setAttribute('src', "https://apis.google.com/js/api.js");
+                gapiScriptTag.setAttribute('src', GAPI_SCRIPT_URL);
                 document.querySelector('body').appendChild(gapiScriptTag);
                 that.googleApiScriptLoaded = true;
             }
 
-            setTimeout(() => {
-                console.log('waiting for google api script');
-                that._withGoogleApi(callbackFn);
-            }, 500);
+            if (this.numberOfAttemptsToLoadGapiScript-- > 0) {
+                setTimeout(() => {
+                    that._withGoogleApi(callbackFn);
+                }, 500);
+            } else {
+                console.error('Cannot load GAPI script');
+            }
         } else { 
             const bindCallbackFn = callbackFn.bind(this);
             bindCallbackFn();
         }
+    }
+
+    getUserData() {
+        return this.currentUser;
     }
 
     isSignedIn() {
@@ -82,6 +93,16 @@ class GoogleAuth {
                     discoveryDocs: DISCOVERY_DOCS,
                     scope: SCOPES
                 }).then(() => {
+                    let userProfile = window.gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile();
+                    that.currentUser = {
+                        id: userProfile.getId(),
+                        name: userProfile.getName(),
+                        givenName: userProfile.getGivenName(),
+                        familyName: userProfile.getFamilyName(),
+                        imageUrl: userProfile.getImageUrl(),
+                        email: userProfile.getEmail(),
+                    };
+
                     // Listen for sign-in state changes.
                     window.gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatusFn);
                     
@@ -101,14 +122,4 @@ class GoogleAuth {
 
 }
 
-
-// return singleton
-if (typeof(window.__googleAuth) == 'undefined') {
-    window.__googleAuth = new GoogleAuth();
-}
-export const GoogleAuth = window.__googleAuth;
-
-// return context obj
-export const AuthContext = React.createContext({});
-export const AuthProvider = AuthContext.Provider;
-export const AuthConsumer = AuthContext.Consumer;
+export default GoogleAuth;

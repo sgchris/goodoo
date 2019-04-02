@@ -1,9 +1,7 @@
 import React, { Component, useContext } from 'react'
-import { AuthConsumer } from './../services/Auth';
 
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
-
 
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -20,7 +18,6 @@ const SCOPES = "https://www.googleapis.com/auth/tasks";
 class TodoList extends Component {
 
     state = {
-        isLoggedIn: false,
         folders: [],
         tasks: [],
     };
@@ -75,7 +72,7 @@ class TodoList extends Component {
         });
     }
 
-    onSearchInputChange = (event) => {
+    onNewTaskInputChange = (event) => {
         // console.log("Search changed ..." + event.target.value)
         // if (event.target.value) {
         //     this.setState({searchString: event.target.value})
@@ -87,32 +84,30 @@ class TodoList extends Component {
 
     render() {
         return (
-            <AuthConsumer>{
-                authObj => {
-                    return <div>
-                        <TextField style={{padding: 24}}
-                            id="searchInput"
-                            placeholder="Search for tasks"   
-                            margin="normal"
-                            onChange={this.onSearchInputChange}
-                            />
-                        <Grid container spacing={24} style={{padding: 24}}>
-                            <List>
-                                <ListItem key="-1">{authObj.authName}</ListItem>
-                            { this.state.folders.map(folder => (
-                                <ListItem key={folder.id}>
-                                    <Avatar>
-                                        <WorkIcon />
-                                    </Avatar>
-                                    <ListItemText primary={folder.name} secondary={ 'ID ' + folder.id } />
-                                </ListItem>
-                            ))}
-                            </List>
-                        </Grid>
-                    </div>
-                }
-            }
-            </AuthConsumer>
+            <div>
+                <TextField style={{padding: 24}}
+                    id="newTaskInput"
+                    placeholder="New task"   
+                    margin="normal"
+                    onChange={this.onNewTaskInputChange}
+                    />
+
+                
+                <Grid container spacing={24} style={{padding: 24}}>
+                    <List>
+                        <ListItem key="-101">GooDoo list item 1</ListItem>
+                        <ListItem key="-102">GooDoo list item 2</ListItem>
+                    { this.state.folders.map(folder => (
+                        <ListItem key={folder.id}>
+                            <Avatar>
+                                <WorkIcon />
+                            </Avatar>
+                            <ListItemText primary={folder.name} secondary={ 'ID ' + folder.id } />
+                        </ListItem>
+                    ))}
+                    </List>
+                </Grid>
+            </div>
         )
     }
 }

@@ -7,8 +7,12 @@ const SCOPES = "https://www.googleapis.com/auth/tasks";
 // const CLIENT_SECRET = 'AL7LY7OOPfa225aEUwoILuxx';
 
 class GoogleAuth {
+    
+    // check that <script> is in
+    googleApiScriptLoaded = false;
 
-    authName = 'google';
+    // "init" method was called
+    objectInitialized = false;
 
     // wait for google API to load (the script tag to finish loading)
     async _withGoogleApi(callbackFn) {
@@ -16,6 +20,15 @@ class GoogleAuth {
         // check if the script has already loaded, if not, wait for 500ms
         // and try again
         if (typeof(window.gapi) == 'undefined') {
+
+            // check if the script is in the doc
+            if (!that.googleApiScriptLoaded) {
+                let gapiScriptTag = document.createElement('script');
+                gapiScriptTag.setAttribute('src', "https://apis.google.com/js/api.js");
+                document.querySelector('body').appendChild(gapiScriptTag);
+                that.googleApiScriptLoaded = true;
+            }
+
             setTimeout(() => {
                 console.log('waiting for google api script');
                 that._withGoogleApi(callbackFn);
@@ -24,6 +37,10 @@ class GoogleAuth {
             const bindCallbackFn = callbackFn.bind(this);
             bindCallbackFn();
         }
+    }
+
+    isSignedIn() {
+        return window.gapi.auth2.getAuthInstance().isSignedIn.get();
     }
 
     /**
@@ -52,6 +69,11 @@ class GoogleAuth {
      * @param {function} failureCallbackFn Failure callback
      */
     init(updateSigninStatusFn, failureCallbackFn) {
+        if (this.objectInitialized) {
+            return;
+        }
+
+        let that = this;
         this._withGoogleApi(() => {
             window.gapi.load('client:auth2', () => {
                 window.gapi.client.init({
@@ -65,6 +87,8 @@ class GoogleAuth {
                     
                     // Handle the initial sign-in state.
                     updateSigninStatusFn(window.gapi.auth2.getAuthInstance().isSignedIn.get());
+
+                    that.objectInitialized = true;
                 }, error => {
                     console.error('google init error', error);
                     if (typeof(failureCallbackFn) == 'function') {
@@ -75,11 +99,16 @@ class GoogleAuth {
         })
     }
 
-
 }
 
-export const googleAuth = new GoogleAuth();
 
-const authContext = React.createContext({});
-export const AuthProvider = authContext.Provider;
-export const AuthConsumer = authContext.Consumer;
+// return singleton
+if (typeof(window.__googleAuth) == 'undefined') {
+    window.__googleAuth = new GoogleAuth();
+}
+export const GoogleAuth = window.__googleAuth;
+
+// return context obj
+export const AuthContext = React.createContext({});
+export const AuthProvider = AuthContext.Provider;
+export const AuthConsumer = AuthContext.Consumer;

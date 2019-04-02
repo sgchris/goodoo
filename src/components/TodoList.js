@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Component, useContext } from 'react'
 import { AuthConsumer } from './../services/Auth';
 
 import Grid from '@material-ui/core/Grid';
@@ -20,6 +20,7 @@ const SCOPES = "https://www.googleapis.com/auth/tasks";
 class TodoList extends Component {
 
     state = {
+        isLoggedIn: false,
         folders: [],
         tasks: [],
     };
@@ -97,7 +98,7 @@ class TodoList extends Component {
                             />
                         <Grid container spacing={24} style={{padding: 24}}>
                             <List>
-                                <ListItem key="000">{authObj.authName}</ListItem>
+                                <ListItem key="-1">{authObj.authName}</ListItem>
                             { this.state.folders.map(folder => (
                                 <ListItem key={folder.id}>
                                     <Avatar>

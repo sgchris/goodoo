@@ -1,4 +1,4 @@
-import React, { Component, useContext } from 'react'
+import React, { Component } from 'react'
 
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
@@ -32,7 +32,6 @@ class TodoList extends Component {
         // check if the script already loaded
         if (typeof(window.gapi) == 'undefined') {
             setTimeout(() => {
-                console.log('waiting for google api script');
                 that.waitForGoogleApi(callbackFn);
             }, 500);
         } else { 
@@ -54,8 +53,6 @@ class TodoList extends Component {
                 discoveryDocs: DISCOVERY_DOCS,
                 scope: SCOPES
             }).then(() => {
-                console.log('google init success');
-
                 // Listen for sign-in state changes.
                 window.gapi.auth2.getAuthInstance().isSignedIn.listen(this.updateSigninStatus);
                 

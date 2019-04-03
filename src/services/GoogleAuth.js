@@ -16,6 +16,9 @@ class GoogleAuth {
 
     currentUser = null;
 
+    // google auth status checked
+    gotInitialAuthStatus = false;
+
     numberOfAttemptsToLoadGapiScript = 20;
 
     // wait for google API to load (the script tag to finish loading)
@@ -93,15 +96,17 @@ class GoogleAuth {
                     discoveryDocs: DISCOVERY_DOCS,
                     scope: SCOPES
                 }).then(() => {
+                    that.gotInitialAuthStatus = true;
+                    
                     let userProfile = window.gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile();
-                    that.currentUser = {
+                    that.currentUser = userProfile ? {
                         id: userProfile.getId(),
                         name: userProfile.getName(),
                         givenName: userProfile.getGivenName(),
                         familyName: userProfile.getFamilyName(),
                         imageUrl: userProfile.getImageUrl(),
                         email: userProfile.getEmail(),
-                    };
+                    } : null;
 
                     // Listen for sign-in state changes.
                     window.gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatusFn);

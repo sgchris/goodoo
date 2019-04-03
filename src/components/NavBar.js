@@ -4,7 +4,8 @@ import Toolbar from '@material-ui/core/Toolbar'
 import Button from '@material-ui/core/Button'
 import Typography from '@material-ui/core/Typography'
 //import SearchIcon from '@material-ui/core/SearchIcon'
-import InputBase from '@material-ui/core/InputBase'
+// import InputBase from '@material-ui/core/InputBase'
+import Avatar from '@material-ui/core/Avatar'
 
 
 class NavBar extends Component {
@@ -14,6 +15,7 @@ class NavBar extends Component {
         let {
             isSignedIn, 
             currentUser,
+            currentUserImage,
             onLogin, 
             onLogout
         } = this.props;
@@ -26,7 +28,11 @@ class NavBar extends Component {
                             GooDoo tasks manager
                         </Typography>
                         {isSignedIn
-                            ? <Button color="inherit" onClick={onLogout}>Logout {currentUser}</Button>
+                            ? <Button color="inherit" title={'Logged in as ' + currentUser + '. Click to sign out'} onClick={onLogout}>
+                                    <Avatar alt="Remy Sharp" src={currentUserImage} style={{margin: 'auto 10px'}}
+                                     />
+                                    {currentUser}
+                                </Button>
                             : <Button color="inherit" onClick={onLogin}>Login</Button>
                         }
                     </Toolbar>

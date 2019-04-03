@@ -2,6 +2,10 @@ import React, { Component } from 'react';
 import GoogleAuth from './services/GoogleAuth';
 import NavBar from './components/NavBar';
 import TodoList from './components/TodoList';
+import Button from '@material-ui/core/Button'
+
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Typography from '@material-ui/core/Typography'
 
 class App extends Component {
     state = {
@@ -57,11 +61,18 @@ class App extends Component {
                 />
                 { this.state.isSignedIn 
                     ? <TodoList /> 
-                    : <h1 style={{textAlign: 'center', padding: '30px'}}>Please sign in</h1>
+                    : <Typography variant="title" color="inherit" style={{textAlign: 'center', padding: '30px' }}>
+                        Please <Button variant="contained" color="primary" onClick={this.googleAuthInstance.signIn.bind(this.googleAuthInstance)}>sign in</Button>
+                    </Typography>
                 }
             </div>
         ) : (
-            <div><h1 style={{textAlign: 'center', padding: '30px' }}>Loading...</h1></div>
+            <div>
+                <Typography variant="title" color="inherit" style={{textAlign: 'center', padding: '30px' }}>
+                    <CircularProgress  size={20} /> <br />
+                    Awesome GooDoo app is Loading...
+                </Typography>
+            </div>
         )
     }
 }

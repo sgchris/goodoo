@@ -8,64 +8,46 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import Avatar from '@material-ui/core/Avatar';
 import WorkIcon from '@material-ui/icons/Work';
-
-const API_KEY = 'AIzaSyBHW8c_z5Q2DgA8vdP7fA8XI7LlgsvDiMY';
-const CLIENT_ID = '710244711285-m1ioc2b9c3aoi9n0v69jacf5aaoct0l0.apps.googleusercontent.com';
-const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/tasks/v1/rest"];
-const SCOPES = "https://www.googleapis.com/auth/tasks";
-// const CLIENT_SECRET = 'AL7LY7OOPfa225aEUwoILuxx';
+import Typography from '@material-ui/core/Typography';
 
 class TodoList extends Component {
 
     state = {
+        selectedFolder: null,
         folders: [],
         tasks: [],
     };
 
     componentDidMount() {
         // get list of tasks folders
-        this.waitForGoogleApi(this.getFolders);
-    }
-     
-    async waitForGoogleApi(callbackFn) {
-        let that = this;
-        // check if the script already loaded
-        if (typeof(window.gapi) == 'undefined') {
-            setTimeout(() => {
-                that.waitForGoogleApi(callbackFn);
-            }, 500);
-        } else { 
-            const bindCallbackFn = callbackFn.bind(this);
-            bindCallbackFn();
-        }
-    }
-
-    updateSigninStatus(a) {
-        console.log('a', a);
+        this.getFolders();
     }
 
     // get tasks folders from google
-    async getFolders() {
-        window.gapi.load('client:auth2', () => {
-            window.gapi.client.init({
-                apiKey: API_KEY,
-                clientId: CLIENT_ID,
-                discoveryDocs: DISCOVERY_DOCS,
-                scope: SCOPES
-            }).then(() => {
-                // Listen for sign-in state changes.
-                window.gapi.auth2.getAuthInstance().isSignedIn.listen(this.updateSigninStatus);
-                
-                // Handle the initial sign-in state.
-                this.updateSigninStatus(window.gapi.auth2.getAuthInstance().isSignedIn.get());
-                /*
-                authorizeButton.onclick = handleAuthClick;
-                signoutButton.onclick = handleSignoutClick;
-                */
-            }, error => {
-                console.log('google init error', error);
-                //appendPre(JSON.stringify(error, null, 2));
-            });
+    getFolders() {
+        let that = this;
+        window.gapi.client.tasks.tasklists.list({
+            'maxResults': 50
+        }).then((response) => {
+            if (response && response.status === 200) {
+                let foldersList = response.result.items.map(
+                    item => ({
+                        id: item.id,
+                        title: item.title,
+                        updated: item.updated
+                    })
+                );
+                that.setState({
+                    folders: foldersList
+                });
+
+                if (foldersList && foldersList.length > 0) {
+                    that.setState({
+                        selectedFolder: foldersList[0]
+                    });
+                }
+            }
+            console.log('response', response);
         });
     }
 
@@ -79,30 +61,48 @@ class TodoList extends Component {
         // this.getCourses()
     }
 
+    tasksListItemClick(event, id) {
+        console.log('tasks list id', id);
+    }
+
     render() {
         return (
             <div>
-                <TextField style={{padding: 24}}
-                    id="newTaskInput"
-                    placeholder="New task"   
-                    margin="normal"
-                    onChange={this.onNewTaskInputChange}
-                    />
+                <Grid container spacing={24}>
+                    <Grid item xs={12} md={3}>
+                        <Typography variant="title" color="inherit" style={{textAlign: 'center', padding: '30px' }}>
+                            Tasks lists
+                        </Typography>
+                        <List>
+                        { this.state.folders.map(folder => (
+                            <ListItem button key={folder.id} 
+                                selected={this.state.selectedFolder && this.state.selectedFolder.id === folder.id}
+                                onClick={event => this.tasksListItemClick(folder.id)}
+                            >
+                                <Avatar>
+                                    <WorkIcon />
+                                </Avatar>
+                                <ListItemText primary={folder.title} secondary={ 'Last updated at ' + folder.updated } />
+                            </ListItem>
+                        ))}
+                        </List>
+                    </Grid>
+                    { this.state.selectedFolder ? (
+                        <Grid item xs={12} md={9}>
+                            {this.state.selectedFolder.title}
 
-                
-                <Grid container spacing={24} style={{padding: 24}}>
-                    <List>
-                        <ListItem key="-101">GooDoo list item 1</ListItem>
-                        <ListItem key="-102">GooDoo list item 2</ListItem>
-                    { this.state.folders.map(folder => (
-                        <ListItem key={folder.id}>
-                            <Avatar>
-                                <WorkIcon />
-                            </Avatar>
-                            <ListItemText primary={folder.name} secondary={ 'ID ' + folder.id } />
-                        </ListItem>
-                    ))}
-                    </List>
+                            <TextField style={{padding: 24}}
+                                id="newTaskInput"
+                                placeholder="New task"   
+                                margin="normal"
+                                onChange={this.onNewTaskInputChange}
+                                />
+
+                        </Grid>
+                    ) : (
+                        <Grid item xs={12} md={9}>No tasks list selected</Grid>
+                    )
+                    }
                 </Grid>
             </div>
         )

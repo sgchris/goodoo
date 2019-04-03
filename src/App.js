@@ -5,7 +5,7 @@ import TodoList from './components/TodoList';
 import Button from '@material-ui/core/Button'
 
 import CircularProgress from '@material-ui/core/CircularProgress';
-import Typography from '@material-ui/core/Typography'
+import Typography from '@material-ui/core/Typography';
 
 class App extends Component {
     state = {
@@ -60,7 +60,7 @@ class App extends Component {
                     onLogout={this.googleAuthInstance.signOut.bind(this.googleAuthInstance)}
                 />
                 { this.state.isSignedIn 
-                    ? <TodoList /> 
+                    ? <TodoList style={{ margin: 24 }} /> 
                     : <Typography variant="title" color="inherit" style={{textAlign: 'center', padding: '30px' }}>
                         Please <Button variant="contained" color="primary" onClick={this.googleAuthInstance.signIn.bind(this.googleAuthInstance)}>sign in</Button>
                     </Typography>

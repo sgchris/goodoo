@@ -3,8 +3,6 @@ import AppBar from '@material-ui/core/AppBar'
 import Toolbar from '@material-ui/core/Toolbar'
 import Button from '@material-ui/core/Button'
 import Typography from '@material-ui/core/Typography'
-//import SearchIcon from '@material-ui/core/SearchIcon'
-// import InputBase from '@material-ui/core/InputBase'
 import Avatar from '@material-ui/core/Avatar'
 
 

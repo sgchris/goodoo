@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 
 import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
+import TasksList from './TasksList';
 
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -10,7 +10,7 @@ import Avatar from '@material-ui/core/Avatar';
 import WorkIcon from '@material-ui/icons/Work';
 import Typography from '@material-ui/core/Typography';
 
-class TodoList extends Component {
+class Todo extends Component {
 
     state = {
         selectedFolder: null,
@@ -42,28 +42,39 @@ class TodoList extends Component {
                 });
 
                 if (foldersList && foldersList.length > 0) {
+                    let selectedFolder = foldersList[0];
                     that.setState({
-                        selectedFolder: foldersList[0]
+                        selectedFolder
                     });
+
+                    that.getTasks(selectedFolder.id);
                 }
             }
             console.log('response', response);
         });
     }
 
-    onNewTaskInputChange = (event) => {
-        // console.log("Search changed ..." + event.target.value)
-        // if (event.target.value) {
-        //     this.setState({searchString: event.target.value})
-        // } else {
-        //     this.setState({searchString: ''})
-        // }
-        // this.getCourses()
+    getTasks(folderId) {
+        window.gapi.client.tasks.tasks.list({
+            tasklist: folderId
+        }).then(response => {
+            if (response.status === 200 && response.result.items) {
+                let tasks = response.result.items.map(taskItem => ({
+                    id: taskItem.id,
+                    due: taskItem.due,
+                    title: taskItem.title,
+                    updated: (new Date(taskItem.updated)).toDateString()
+                }));
+                console.log('todo::getTasks. tasks', tasks);
+                this.setState({tasks});
+            }
+        })
     }
 
     tasksListItemClick(event, clickedFolderData) {
         if (clickedFolderData) {
             this.setState({selectedFolder: clickedFolderData});
+            this.getTasks(clickedFolderData.id);
         }
     }
 
@@ -81,7 +92,9 @@ class TodoList extends Component {
                                 selected={this.state.selectedFolder && this.state.selectedFolder.id === folder.id}
                                 onClick={event => this.tasksListItemClick(event, folder)}
                             >
-                                <Avatar><WorkIcon /></Avatar>
+                                <Avatar>
+                                    <WorkIcon />
+                                </Avatar>
                                 <ListItemText primary={folder.title} secondary={ 'Last updated at ' + folder.updated } />
                             </ListItem>
                         ))}
@@ -93,13 +106,19 @@ class TodoList extends Component {
                                 Folder: {this.state.selectedFolder.title}
                             </Typography>
 
+                            <TasksList tasks={this.state.tasks} 
+                                onTaskCreate={a => a}
+                                onTaskComplete={a => a}
+                                onTaskDelete={a => a}
+                            />
+                            {/*
                             <TextField style={{padding: 24}}
                                 id="newTaskInput"
                                 placeholder="New task"   
                                 margin="normal"
                                 onChange={this.onNewTaskInputChange}
                                 />
-
+                            */}
                         </Grid>
                     ) : (
                         <Grid item xs={12} md={9}>No tasks list selected</Grid>
@@ -110,4 +129,4 @@ class TodoList extends Component {
         )
     }
 }
-export default TodoList;
+export default Todo;

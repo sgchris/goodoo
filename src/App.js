@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import GoogleAuth from './services/GoogleAuth';
 import NavBar from './components/NavBar';
-import TodoList from './components/TodoList';
+import Todo from './components/Todo';
 import Button from '@material-ui/core/Button'
 
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -52,7 +52,7 @@ class App extends Component {
 
         return this.state.authChecked ? (
             <div>
-                <NavBar 
+                <NavBar
                     isSignedIn={this.state.isSignedIn} 
                     currentUser={this.state.currentUser}
                     currentUserImage={this.state.currentUserImage}
@@ -60,7 +60,7 @@ class App extends Component {
                     onLogout={this.googleAuthInstance.signOut.bind(this.googleAuthInstance)}
                 />
                 { this.state.isSignedIn 
-                    ? <TodoList style={{ margin: 24 }} /> 
+                    ? <Todo style={{ margin: 24 }} /> 
                     : <Typography variant="title" color="inherit" style={{textAlign: 'center', padding: '30px' }}>
                         Please <Button variant="contained" color="primary" onClick={this.googleAuthInstance.signIn.bind(this.googleAuthInstance)}>sign in</Button>
                     </Typography>

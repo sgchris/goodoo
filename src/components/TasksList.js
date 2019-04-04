@@ -10,11 +10,9 @@ import Avatar from '@material-ui/core/Avatar';
 import WorkIcon from '@material-ui/icons/Work';
 import Typography from '@material-ui/core/Typography';
 
-class TodoList extends Component {
+class Tasks extends Component {
 
     state = {
-        selectedFolder: null,
-        folders: [],
         tasks: [],
     };
 
@@ -23,42 +21,18 @@ class TodoList extends Component {
         this.getFolders();
     }
 
-    // get tasks folders from google
-    getFolders() {
-        let that = this;
-        window.gapi.client.tasks.tasklists.list({
-            'maxResults': 50
-        }).then((response) => {
-            if (response && response.status === 200) {
-                let foldersList = response.result.items.map(
-                    item => ({
-                        id: item.id,
-                        title: item.title,
-                        updated: item.updated
-                    })
-                );
-                that.setState({
-                    folders: foldersList
-                });
+    constructor(props) {
+        super(props);
 
-                if (foldersList && foldersList.length > 0) {
-                    that.setState({
-                        selectedFolder: foldersList[0]
-                    });
-                }
-            }
-            console.log('response', response);
-        });
-    }
+        this.props = props;
 
-    onNewTaskInputChange = (event) => {
-        // console.log("Search changed ..." + event.target.value)
-        // if (event.target.value) {
-        //     this.setState({searchString: event.target.value})
-        // } else {
-        //     this.setState({searchString: ''})
-        // }
-        // this.getCourses()
+        // set initial tasks from props
+        const { tasks, onNewTask } = props;
+        if (tasks && tasks.length > 0) {
+            this.setState({
+                tasks
+            });
+        }
     }
 
     tasksListItemClick(event, clickedFolderData) {
@@ -72,7 +46,7 @@ class TodoList extends Component {
             <div>
                 <Grid container spacing={24}>
                     <Grid item xs={12} md={3}>
-                        <Typography variant="title" color="inherit" style={{padding: '30px' }}>
+                        <Typography variant="title" color="inherit" style={{textAlign: 'center', padding: '30px' }}>
                             Tasks lists
                         </Typography>
                         <List>
@@ -89,8 +63,8 @@ class TodoList extends Component {
                     </Grid>
                     { this.state.selectedFolder ? (
                         <Grid item xs={12} md={9}>
-                            <Typography variant="title" color="inherit" style={{padding: '30px' }}>
-                                Folder: {this.state.selectedFolder.title}
+                            <Typography variant="title" color="inherit">
+                                {this.state.selectedFolder.title}
                             </Typography>
 
                             <TextField style={{padding: 24}}

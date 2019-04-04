@@ -7,12 +7,16 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import Icon from '@material-ui/core/Icon';
 import WorkIcon from '@material-ui/icons/Work';
 import AssignmentIcon from '@material-ui/icons/Assignment';
 import DoneIcon from '@material-ui/icons/Done';
+import DeleteIcon from '@material-ui/icons/Delete';
 import Typography from '@material-ui/core/Typography';
 import indigo from '@material-ui/core/colors/indigo';
+import red from '@material-ui/core/colors/red';
 
 class TasksList extends Component {
     render() {
@@ -20,11 +24,16 @@ class TasksList extends Component {
             <div>  
                 <List>
                 { this.props.tasks.map(task => (
-                    <ListItem key={task.id}>
+                    <ListItem button key={task.id}>
                         {/*<Avatar style={{background: indigo[500]}}><AssignmentIcon /></Avatar>*/}
-                        <Button title="Mark the task as complete" onClick={this.props.onTaskComplete}>
+                        <ListItemSecondaryAction>
+                            <IconButton aria-label="Delete" onClick={this.props.onTaskDelete}>
+                                <DeleteIcon />
+                            </IconButton>
+                        </ListItemSecondaryAction>
+                        <IconButton title="Mark the task as complete" onClick={this.props.onTaskComplete}>
                             <Avatar style={{background: indigo[500]}}><DoneIcon /></Avatar>
-                        </Button>
+                        </IconButton>
                         <ListItemText primary={task.title} secondary={ 'Last updated at ' + task.updated } />
                     </ListItem>
                 ))}

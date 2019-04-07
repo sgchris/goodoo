@@ -13,6 +13,7 @@ import Icon from '@material-ui/core/Icon';
 import WorkIcon from '@material-ui/icons/Work';
 import AssignmentIcon from '@material-ui/icons/Assignment';
 import DoneIcon from '@material-ui/icons/Done';
+import DoneOutlineIcon from '@material-ui/icons/DoneOutline';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Typography from '@material-ui/core/Typography';
 import indigo from '@material-ui/core/colors/indigo';
@@ -41,7 +42,7 @@ class TasksList extends Component {
                         { task.status === "completed" ?  (
                             <IconButton title="Task completed. Click to mark as uncompleted"
                                 onClick={event => this.props.markTaskComplete(event, task, 'mark as not completed')}>
-                                <Avatar><DoneIcon /></Avatar>
+                                <Avatar><DoneOutlineIcon /></Avatar>
                             </IconButton>
                         ) : (
                                 <IconButton title="Mark complete" 

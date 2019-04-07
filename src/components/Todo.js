@@ -9,6 +9,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Avatar from '@material-ui/core/Avatar';
 import WorkIcon from '@material-ui/icons/Work';
 import Typography from '@material-ui/core/Typography';
+import Switch from '@material-ui/core/Switch';
 
 class Todo extends Component {
 
@@ -16,7 +17,16 @@ class Todo extends Component {
         selectedFolder: null,
         folders: [],
         tasks: [],
+        showCompleted: false,
     };
+
+    constructor(props) {
+        super(props);
+
+        this.onTaskCreate=this.onTaskCreate.bind(this);
+        this.markTaskComplete=this.markTaskComplete.bind(this);
+        this.onTaskDelete=this.onTaskDelete.bind(this);
+    }
 
     componentDidMount() {
         // get list of tasks folders
@@ -27,7 +37,7 @@ class Todo extends Component {
     getFolders() {
         let that = this;
         window.gapi.client.tasks.tasklists.list({
-            'maxResults': 50
+            'maxResults': 100
         }).then((response) => {
             if (response && response.status === 200) {
                 let foldersList = response.result.items.map(
@@ -47,16 +57,24 @@ class Todo extends Component {
                         selectedFolder
                     });
 
-                    that.getTasks(selectedFolder.id);
+                    that.getTasks();
                 }
             }
             console.log('response', response);
         });
     }
 
-    getTasks(folderId) {
+    getTasks() {
+        // check that a folder is selected
+        if (!this.state.selectedFolder) {
+            return false;
+        }
+
+        console.log('getTasks: this.state.showCompleted', this.state.showCompleted)
+
         window.gapi.client.tasks.tasks.list({
-            tasklist: folderId
+            tasklist: this.state.selectedFolder.id,
+            showCompleted: this.state.showCompleted
         }).then(response => {
             if (response.status === 200 && response.result.items) {
                 let tasks = response.result.items.map(taskItem => ({
@@ -65,17 +83,75 @@ class Todo extends Component {
                     title: taskItem.title,
                     updated: (new Date(taskItem.updated)).toDateString()
                 }));
+                tasks = response.result.items;
                 console.log('todo::getTasks. tasks', tasks);
                 this.setState({tasks});
             }
         })
     }
 
-    tasksListItemClick(event, clickedFolderData) {
+    folderClick(event, clickedFolderData) {
         if (clickedFolderData) {
-            this.setState({selectedFolder: clickedFolderData});
-            this.getTasks(clickedFolderData.id);
+            this.setState(
+                {selectedFolder: clickedFolderData}, 
+                () => this.getTasks()
+            );
         }
+    }
+
+    onTaskCreate(_, newTaskData) {
+        console.log('onTaskCreate', newTaskData);
+    }
+
+    markTaskComplete(_, clickedTaskData, markAsNotComplete) {
+        if (!clickedTaskData || !clickedTaskData.id) {
+            return false;
+        }
+
+        // update the task object
+        if (markAsNotComplete) { // check if the opposite action required
+            clickedTaskData.status = "needsAction";
+            if ("completed" in clickedTaskData) {
+                delete clickedTaskData.completed;
+            }
+        } else {
+            clickedTaskData.status = "completed";
+            clickedTaskData.completed = new Date();
+        }
+        console.log('clickedTaskData', clickedTaskData);
+        window.gapi.client.tasks.tasks.update({
+            task: clickedTaskData.id,
+            tasklist: this.state.selectedFolder.id,
+            resource: clickedTaskData
+        }).then(
+            response => this.getTasks(), 
+            err => console.error("Execute error", err)
+        );
+    }
+
+    onTaskDelete(_, clickedTaskData) {
+        console.log('on delete', clickedTaskData);
+        if (!clickedTaskData || !clickedTaskData.id) {
+            return false;
+        }
+
+        console.log('calling delete api');
+        window.gapi.client.tasks.tasks.delete({
+            task: clickedTaskData.id,
+            tasklist: this.state.selectedFolder.id,
+        }).then(
+            response => this.getTasks(), 
+            err => console.error("Execute error", err)
+        );
+    }
+
+    // callback for the "show completed" switch
+    onShowCompleted(showCompleted) {
+        console.log('showCompleted', showCompleted);
+        this.setState(
+            {showCompleted},
+            () => this.getTasks()
+        );
     }
 
     render() {
@@ -90,7 +166,7 @@ class Todo extends Component {
                         { this.state.folders.map(folder => (
                             <ListItem button key={folder.id} 
                                 selected={this.state.selectedFolder && this.state.selectedFolder.id === folder.id}
-                                onClick={event => this.tasksListItemClick(event, folder)}
+                                onClick={event => this.folderClick(event, folder)}
                             >
                                 <Avatar>
                                     <WorkIcon />
@@ -102,23 +178,20 @@ class Todo extends Component {
                     </Grid>
                     { this.state.selectedFolder ? (
                         <Grid item xs={12} md={9}>
+                            <div style={{float: 'right', padding: '18px'}}>
+                                <Typography>Show completed <Switch color="primary" checked={this.state.showCompleted}
+                                    onChange={event => this.onShowCompleted(event.target.checked)} />
+                                </Typography>
+                            </div>
                             <Typography variant="title" color="inherit" style={{padding: '30px' }}>
                                 Folder: {this.state.selectedFolder.title}
                             </Typography>
 
                             <TasksList tasks={this.state.tasks} 
-                                onTaskCreate={a => a}
-                                onTaskComplete={a => a}
-                                onTaskDelete={a => a}
+                                onTaskCreate={this.onTaskCreate}
+                                markTaskComplete={this.markTaskComplete}
+                                onTaskDelete={this.onTaskDelete}
                             />
-                            {/*
-                            <TextField style={{padding: 24}}
-                                id="newTaskInput"
-                                placeholder="New task"   
-                                margin="normal"
-                                onChange={this.onNewTaskInputChange}
-                                />
-                            */}
                         </Grid>
                     ) : (
                         <Grid item xs={12} md={9}>No tasks list selected</Grid>

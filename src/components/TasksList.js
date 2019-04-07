@@ -19,22 +19,56 @@ import indigo from '@material-ui/core/colors/indigo';
 import red from '@material-ui/core/colors/red';
 
 class TasksList extends Component {
+
+    // onTaskCreate(event, newTaskData) {
+    //     this.props.onTaskCreate(newTaskData);
+    // }
+
+    // onTaskComplete(event, clickedTaskData) {
+    //     this.props.onTaskComplete(clickedTaskData);
+    // }
+
+    // onTaskDelete(event, clickedTaskData) {
+    //     this.props.onTaskDelete(clickedTaskData);
+    // }
+
     render() {
         return (
             <div>  
                 <List>
                 { this.props.tasks.map(task => (
                     <ListItem button key={task.id}>
-                        {/*<Avatar style={{background: indigo[500]}}><AssignmentIcon /></Avatar>*/}
+                        { task.status === "completed" ?  (
+                            <IconButton title="Task completed. Click to mark as uncompleted"
+                                onClick={event => this.props.markTaskComplete(event, task, 'mark as not completed')}>
+                                <Avatar><DoneIcon /></Avatar>
+                            </IconButton>
+                        ) : (
+                                <IconButton title="Mark complete" 
+                                    onClick={event => this.props.markTaskComplete(event, task)}>
+                                    <Avatar style={{background: indigo[500]}}><DoneIcon /></Avatar>
+                                </IconButton>
+                            )
+                        }
+                        {/*<ListItemText primary={task.title} secondary={ 'Last updated at ' + task.updated } />*/}
+                        <ListItemText primary={
+                            <React.Fragment>
+                                { task.status === "completed" ? <strike>{task.title}</strike> : task.title}
+                            </React.Fragment>
+                        } secondary={
+                            <React.Fragment>
+                                {   
+                                    task.status === "completed" ? 
+                                    'Completed at ' + (new Date(task.completed)).toDateString() :  
+                                    'Updated at ' + (new Date(task.updated)).toDateString()
+                                }
+                            </React.Fragment>
+                        } />
                         <ListItemSecondaryAction>
-                            <IconButton aria-label="Delete" onClick={this.props.onTaskDelete}>
+                            <IconButton aria-label="Delete" onClick={event => this.props.onTaskDelete(event, task)}>
                                 <DeleteIcon />
                             </IconButton>
                         </ListItemSecondaryAction>
-                        <IconButton title="Mark the task as complete" onClick={this.props.onTaskComplete}>
-                            <Avatar style={{background: indigo[500]}}><DoneIcon /></Avatar>
-                        </IconButton>
-                        <ListItemText primary={task.title} secondary={ 'Last updated at ' + task.updated } />
                     </ListItem>
                 ))}
                 </List>

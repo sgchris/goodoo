@@ -10,6 +10,9 @@ import Avatar from '@material-ui/core/Avatar';
 import WorkIcon from '@material-ui/icons/Work';
 import Typography from '@material-ui/core/Typography';
 import Switch from '@material-ui/core/Switch';
+import Fab from '@material-ui/core/Fab';
+import AddIcon from '@material-ui/icons/Add';
+import IconButton from '@material-ui/core/IconButton';
 
 class Todo extends Component {
 
@@ -160,7 +163,7 @@ class Todo extends Component {
                 <Grid container spacing={24}>
                     <Grid item xs={12} md={3}>
                         <Typography variant="title" color="inherit" style={{padding: '30px' }}>
-                            Tasks lists
+                            Tasks lists <Fab size="small" color="secondary" aria-label="Add" title="Add folder"><AddIcon /></Fab>
                         </Typography>
                         <List>
                         { this.state.folders.map(folder => (
@@ -184,7 +187,7 @@ class Todo extends Component {
                                 </Typography>
                             </div>
                             <Typography variant="title" color="inherit" style={{padding: '30px' }}>
-                                Folder: {this.state.selectedFolder.title}
+                                Folder: {this.state.selectedFolder.title} <Fab size="small" color="secondary" aria-label="Add" title="Add task"><AddIcon /></Fab>
                             </Typography>
 
                             <TasksList tasks={this.state.tasks} 

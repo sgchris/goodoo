@@ -4,7 +4,7 @@ import Toolbar from '@material-ui/core/Toolbar'
 import Button from '@material-ui/core/Button'
 import Typography from '@material-ui/core/Typography'
 import Avatar from '@material-ui/core/Avatar'
-
+import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 
 class NavBar extends Component {
 
@@ -31,7 +31,12 @@ class NavBar extends Component {
                                      />
                                     {currentUser}
                                 </Button>
-                            : <Button color="inherit" onClick={onLogin}>Login</Button>
+                            : (
+                                <Button color="inherit" onClick={onLogin}>
+                                    {/*<AccountCircleIcon style={{marginRight: '10px'}} /> Sign in*/}
+                                    <img src={process.env.PUBLIC_URL + '/google_logo.svg.png'} style={{height: '24px', width: '24px', marginRight: '10px'}} /> Sign in
+                                </Button>
+                            )
                         }
                     </Toolbar>
                 </AppBar>

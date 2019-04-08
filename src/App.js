@@ -62,7 +62,10 @@ class App extends Component {
                 { this.state.isSignedIn 
                     ? <Todo style={{ margin: 24 }} /> 
                     : <Typography variant="title" color="inherit" style={{textAlign: 'center', padding: '30px' }}>
-                        Please <Button variant="contained" color="primary" onClick={this.googleAuthInstance.signIn.bind(this.googleAuthInstance)}>sign in</Button>
+                        Please <Button variant="contained" color="primary" 
+                            onClick={this.googleAuthInstance.signIn.bind(this.googleAuthInstance)}>
+                            <img src={process.env.PUBLIC_URL + '/google_logo.svg.png'} style={{height: '24px', width: '24px', marginRight: '10px'}} /> sign in
+                        </Button>
                     </Typography>
                 }
             </div>

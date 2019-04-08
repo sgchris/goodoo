@@ -34,7 +34,7 @@ class NavBar extends Component {
                             : (
                                 <Button color="inherit" onClick={onLogin}>
                                     {/*<AccountCircleIcon style={{marginRight: '10px'}} /> Sign in*/}
-                                    <img src={process.env.PUBLIC_URL + '/google_logo.svg.png'} style={{height: '24px', width: '24px', marginRight: '10px'}} /> Sign in
+                                    <img alt="Google logo" src={process.env.PUBLIC_URL + '/google_logo.svg.png'} style={{height: '24px', width: '24px', marginRight: '10px'}} /> Sign in
                                 </Button>
                             )
                         }

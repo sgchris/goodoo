@@ -2,6 +2,8 @@ import React, { Component } from 'react'
 
 import Grid from '@material-ui/core/Grid';
 import TasksList from './TasksList';
+import FoldersList from './FoldersList';
+import AddTaskDialog from './../dialogs/AddTaskDialog';
 
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -12,7 +14,6 @@ import Typography from '@material-ui/core/Typography';
 import Switch from '@material-ui/core/Switch';
 import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
-import IconButton from '@material-ui/core/IconButton';
 
 class Todo extends Component {
 
@@ -29,6 +30,8 @@ class Todo extends Component {
         this.onTaskCreate=this.onTaskCreate.bind(this);
         this.markTaskComplete=this.markTaskComplete.bind(this);
         this.onTaskDelete=this.onTaskDelete.bind(this);
+
+        this.folderClick = this.folderClick.bind(this);
     }
 
     componentDidMount() {
@@ -121,7 +124,7 @@ class Todo extends Component {
             clickedTaskData.status = "completed";
             clickedTaskData.completed = new Date();
         }
-        console.log('clickedTaskData', clickedTaskData);
+        
         window.gapi.client.tasks.tasks.update({
             task: clickedTaskData.id,
             tasklist: this.state.selectedFolder.id,
@@ -133,12 +136,10 @@ class Todo extends Component {
     }
 
     onTaskDelete(_, clickedTaskData) {
-        console.log('on delete', clickedTaskData);
         if (!clickedTaskData || !clickedTaskData.id) {
             return false;
         }
 
-        console.log('calling delete api');
         window.gapi.client.tasks.tasks.delete({
             task: clickedTaskData.id,
             tasklist: this.state.selectedFolder.id,
@@ -160,24 +161,20 @@ class Todo extends Component {
     render() {
         return (
             <div>
+                <AddTaskDialog open={true} 
+                    folderName={this.state.selectedFolder ? this.state.selectedFolder.title : ''}
+                    callback={() => console.log('on callback')}
+                    onClose={() => console.log('on close')}
+                />
                 <Grid container spacing={24}>
                     <Grid item xs={12} md={3}>
                         <Typography variant="title" color="inherit" style={{padding: '30px' }}>
                             Tasks lists <Fab size="small" color="secondary" aria-label="Add" title="Add folder"><AddIcon /></Fab>
                         </Typography>
-                        <List>
-                        { this.state.folders.map(folder => (
-                            <ListItem button key={folder.id} 
-                                selected={this.state.selectedFolder && this.state.selectedFolder.id === folder.id}
-                                onClick={event => this.folderClick(event, folder)}
-                            >
-                                <Avatar>
-                                    <WorkIcon />
-                                </Avatar>
-                                <ListItemText primary={folder.title} secondary={ 'Last updated at ' + folder.updated } />
-                            </ListItem>
-                        ))}
-                        </List>
+                        <FoldersList folders={this.state.folders} 
+                            selectedFolderId={this.state.selectedFolder ? this.state.selectedFolder.id : null} 
+                            folderClick={this.folderClick} 
+                        />
                     </Grid>
                     { this.state.selectedFolder ? (
                         <Grid item xs={12} md={9}>

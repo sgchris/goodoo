@@ -13,38 +13,74 @@ import Grid from '@material-ui/core/Grid';
 import { withStyles } from '@material-ui/core/styles';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider, TimePicker, DatePicker } from 'material-ui-pickers';
+import { Checkbox } from '@material-ui/core';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 
-
+const initialState = {
+    open: false,
+    addRemider: false,
+    date: new Date(),
+    title: '',
+}
 
 export default class AddTaskDialog extends React.Component {
     taskTitle = '';
     taskDate = null;
     taskTime = null;
 
-    handleDateChange = date => {
-        console.log('date changed', date);
-        this.taskDate = date;
+    constructor(props) {
+        super(props);
+        this.state = initialState;
     }
-    handleTimeChange = time => {
-        console.log('time changed', time);
-        this.taskTime = time;
+
+    componentDidMount() {
+        this.setState({open: this.props.open});
     }
-    handleTitleChange = event => {
-        this.taskTitle = event.target.value;
+
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.open !== this.state.open) {
+          this.setState({ open: nextProps.open });
+        }
     }
+
+    handleDateChange = date => this.setState({date});
+
+    handleTitleChange = event => this.setState({title: event.target.value});
+
+    handleClose = () => {
+        this.setState({open: false});
+
+        if (this.props.onClose) {
+            this.props.onClose();
+        }
+    }
+
+    handleCallback = () => {
+        if (this.props.callback) {
+            this.props.callback({
+                title: this.state.title,
+                date: this.state.date,
+                addRemider: this.state.addRemider,
+            });
+        }
+
+        this.setState(initialState);
+    }
+
     render() {
         return (
             <div>
                 <Dialog
-                    open={this.props.open}
-                    onClose={this.props.onClose}
+                    fullWidth={true}
+                    maxWidth="md"
+                    open={this.state.open}
+                    onClose={this.handleClose}
                     aria-labelledby="form-dialog-title"
                 >
-                    <DialogTitle id="form-dialog-title">Add task</DialogTitle>
+                    <DialogTitle id="form-dialog-title">
+                        Add task {this.props.folderName && 'to "' + this.props.folderName + '"'}
+                    </DialogTitle>
                     <DialogContent>
-                        <DialogContentText>
-                            Add new task to {this.props.folderName} list
-                        </DialogContentText>
                         <TextField
                             autoFocus
                             margin="dense"
@@ -52,27 +88,45 @@ export default class AddTaskDialog extends React.Component {
                             label="The task"
                             type="text"
                             fullWidth
+                            value={this.state.title}
                             onChange={this.handleTitleChange}
-                        />
+                            />
 
+                        <DialogContentText>
+                            <FormControlLabel 
+                                control={(
+                                    <Checkbox 
+                                        color="primary"
+                                        style={{marginRight: '10px'}} 
+                                        onChange={event => this.setState({addRemider: event.target.checked})}
+                                        checked={this.state.addRemider} 
+                                    />
+                                )}
+                                label="Set reminder"
+                            />
+                        </DialogContentText>
                         <MuiPickersUtilsProvider utils={DateFnsUtils}>
                             <DatePicker
+                                disabled={!this.state.addRemider}
                                 margin="normal"
                                 label="Date picker"
+                                value={this.state.date}
                                 onChange={this.handleDateChange}
-                            />
+                                />
                             <TimePicker
+                                disabled={!this.state.addRemider}
                                 margin="normal"
                                 label="Time picker"
-                                onChange={this.handleTimeChange}
+                                value={this.state.date}
+                                onChange={this.handleDateChange}
                             />
                         </MuiPickersUtilsProvider>
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={this.props.onClose} color="primary">
+                        <Button onClick={this.handleClose} color="primary">
                             Cancel
                         </Button>
-                        <Button onClick={this.props.callback} color="primary">
+                        <Button onClick={this.handleCallback} color="primary">
                             Add
                         </Button>
                     </DialogActions>

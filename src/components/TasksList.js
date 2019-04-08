@@ -10,8 +10,26 @@ import DoneIcon from '@material-ui/icons/Done';
 import DoneOutlineIcon from '@material-ui/icons/DoneOutline';
 import DeleteIcon from '@material-ui/icons/Delete';
 import indigo from '@material-ui/core/colors/indigo';
+import {formatRelative} from 'date-fns';
+import { Typography } from '@material-ui/core';
 
 class TasksList extends Component {
+
+    getTaskSecondRow(task) {
+        if (task.status === 'completed') {
+            return 'Completed at ' + formatRelative(new Date(task.completed), new Date());
+        } else if (task.due) {
+            if ((new Date(task.due)) > (new Date())) {
+                // future
+                return <Typography color="primary">Reminder at {formatRelative(new Date(task.due), new Date())}</Typography>
+            } else {
+                // past
+                return <Typography color="error">Missed reminder {formatRelative(new Date(task.due), new Date())}</Typography>
+            }
+        } else {
+            return 'Updated at ' + formatRelative(new Date(task.updated), new Date())
+        }
+    }
 
     render() {
         return (
@@ -37,11 +55,7 @@ class TasksList extends Component {
                             </React.Fragment>
                         } secondary={
                             <React.Fragment>
-                                {   
-                                    task.status === "completed" ? 
-                                    'Completed at ' + (new Date(task.completed)).toDateString() :  
-                                    'Updated at ' + (new Date(task.updated)).toDateString()
-                                }
+                                {this.getTaskSecondRow(task)}
                             </React.Fragment>
                         } />
                         <ListItemSecondaryAction>

@@ -22,6 +22,7 @@ class Todo extends Component {
         folders: [],
         tasks: [],
         showCompleted: false,
+        showAddTaskDialog: false,
     };
 
     constructor(props) {
@@ -66,7 +67,6 @@ class Todo extends Component {
                     that.getTasks();
                 }
             }
-            console.log('response', response);
         });
     }
 
@@ -76,22 +76,12 @@ class Todo extends Component {
             return false;
         }
 
-        console.log('getTasks: this.state.showCompleted', this.state.showCompleted)
-
         window.gapi.client.tasks.tasks.list({
             tasklist: this.state.selectedFolder.id,
             showCompleted: this.state.showCompleted
         }).then(response => {
             if (response.status === 200 && response.result.items) {
-                let tasks = response.result.items.map(taskItem => ({
-                    id: taskItem.id,
-                    due: taskItem.due,
-                    title: taskItem.title,
-                    updated: (new Date(taskItem.updated)).toDateString()
-                }));
-                tasks = response.result.items;
-                console.log('todo::getTasks. tasks', tasks);
-                this.setState({tasks});
+                this.setState({tasks:response.result.items});
             }
         })
     }
@@ -105,8 +95,31 @@ class Todo extends Component {
         }
     }
 
-    onTaskCreate(_, newTaskData) {
-        console.log('onTaskCreate', newTaskData);
+    onAddTaskButtonClicked = (event) => {
+        this.setState({showAddTaskDialog: true})
+    }
+
+    onTaskCreate(newTaskData) {
+        // hide the dialog
+        this.setState({showAddTaskDialog: false})
+
+        // generate new resource
+        const resource = {
+            title: newTaskData.title,
+            statue: "needsAction"
+        };
+
+        if (newTaskData.addRemider) {
+            resource.due = newTaskData.date;
+        }
+
+        window.gapi.client.tasks.tasks.insert({
+            tasklist: this.state.selectedFolder.id,
+            resource
+        }).then(
+            response => this.getTasks(), 
+            err => console.error("Execute error", err)
+        );
     }
 
     markTaskComplete(_, clickedTaskData, markAsNotComplete) {
@@ -161,15 +174,22 @@ class Todo extends Component {
     render() {
         return (
             <div>
-                <AddTaskDialog open={true} 
+                <AddTaskDialog open={this.state.showAddTaskDialog} 
                     folderName={this.state.selectedFolder ? this.state.selectedFolder.title : ''}
-                    callback={() => console.log('on callback')}
+                    callback={this.onTaskCreate}
                     onClose={() => console.log('on close')}
                 />
                 <Grid container spacing={24}>
                     <Grid item xs={12} md={3}>
                         <Typography variant="title" color="inherit" style={{padding: '30px' }}>
-                            Tasks lists <Fab size="small" color="secondary" aria-label="Add" title="Add folder"><AddIcon /></Fab>
+                            Tasks lists 
+                            <Fab size="small" color="secondary" 
+                                style={{marginLeft: '10px'}}
+                                aria-label="Add" 
+                                title="Add folder" 
+                            >
+                                <AddIcon />
+                            </Fab>
                         </Typography>
                         <FoldersList folders={this.state.folders} 
                             selectedFolderId={this.state.selectedFolder ? this.state.selectedFolder.id : null} 
@@ -184,7 +204,15 @@ class Todo extends Component {
                                 </Typography>
                             </div>
                             <Typography variant="title" color="inherit" style={{padding: '30px' }}>
-                                Folder: {this.state.selectedFolder.title} <Fab size="small" color="secondary" aria-label="Add" title="Add task"><AddIcon /></Fab>
+                                Folder: {this.state.selectedFolder.title} 
+                                <Fab size="small" color="secondary" 
+                                    style={{marginLeft: '10px'}}
+                                    aria-label="Add" 
+                                    title="Add task"
+                                    onClick={this.onAddTaskButtonClicked}
+                                >
+                                    <AddIcon />
+                                </Fab>
                             </Typography>
 
                             <TasksList tasks={this.state.tasks} 

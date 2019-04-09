@@ -17,6 +17,7 @@ import { Checkbox } from '@material-ui/core';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 
 const initialState = {
+    isEdit: false,
     open: false,
     addRemider: false,
     date: new Date(),
@@ -35,6 +36,10 @@ export default class AddTaskDialog extends React.Component {
 
     componentDidMount() {
         this.setState({open: this.props.open});
+
+        if (this.props.task) {
+            this.setState({isEdit: true});
+        }
     }
 
     componentWillReceiveProps(nextProps) {
@@ -81,52 +86,54 @@ export default class AddTaskDialog extends React.Component {
                         Add task {this.props.folderName && 'to "' + this.props.folderName + '"'}
                     </DialogTitle>
                     <DialogContent>
-                        <TextField
-                            autoFocus
-                            margin="dense"
-                            id="name"
-                            label="The task"
-                            type="text"
-                            fullWidth
-                            value={this.state.title}
-                            onChange={this.handleTitleChange}
-                            />
-
-                        <DialogContentText>
-                            <FormControlLabel 
-                                control={(
-                                    <Checkbox 
-                                        color="primary"
-                                        style={{marginRight: '10px'}} 
-                                        onChange={event => this.setState({addRemider: event.target.checked})}
-                                        checked={this.state.addRemider} 
-                                    />
-                                )}
-                                label="Set reminder"
-                            />
-                        </DialogContentText>
-                        <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                            <DatePicker
-                                disabled={!this.state.addRemider}
-                                margin="normal"
-                                label="Date picker"
-                                value={this.state.date}
-                                onChange={this.handleDateChange}
+                        <form onSubmit={this.handleCallback}>
+                            <TextField
+                                autoFocus
+                                margin="dense"
+                                id="name"
+                                label="The task"
+                                type="text"
+                                fullWidth
+                                value={this.state.title}
+                                onChange={this.handleTitleChange}
                                 />
-                            <TimePicker
-                                disabled={!this.state.addRemider}
-                                margin="normal"
-                                label="Time picker"
-                                value={this.state.date}
-                                onChange={this.handleDateChange}
-                            />
-                        </MuiPickersUtilsProvider>
+
+                            <DialogContentText>
+                                <FormControlLabel 
+                                    control={(
+                                        <Checkbox 
+                                            color="primary"
+                                            style={{marginRight: '10px'}} 
+                                            onChange={event => this.setState({addRemider: event.target.checked})}
+                                            checked={this.state.addRemider} 
+                                        />
+                                    )}
+                                    label="Set reminder"
+                                />
+                            </DialogContentText>
+                            <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                                <DatePicker
+                                    disabled={!this.state.addRemider}
+                                    margin="normal"
+                                    label="Date picker"
+                                    value={this.state.date}
+                                    onChange={this.handleDateChange}
+                                    />
+                                <TimePicker
+                                    disabled={!this.state.addRemider}
+                                    margin="normal"
+                                    label="Time picker"
+                                    value={this.state.date}
+                                    onChange={this.handleDateChange}
+                                />
+                            </MuiPickersUtilsProvider>
+                        </form>
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={this.handleClose} color="primary">
+                        <Button type="button" onClick={this.handleClose} color="primary">
                             Cancel
                         </Button>
-                        <Button onClick={this.handleCallback} color="primary">
+                        <Button type="submit" onClick={this.handleCallback} color="primary">
                             Add
                         </Button>
                     </DialogActions>

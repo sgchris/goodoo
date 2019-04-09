@@ -13,6 +13,8 @@ import indigo from '@material-ui/core/colors/indigo';
 import {formatRelative} from 'date-fns';
 import { Typography } from '@material-ui/core';
 
+import red from '@material-ui/core/colors/red';
+
 class TasksList extends Component {
 
     getTaskSecondRow(task) {
@@ -21,10 +23,10 @@ class TasksList extends Component {
         } else if (task.due) {
             if ((new Date(task.due)) > (new Date())) {
                 // future
-                return <Typography color="primary">Reminder at {formatRelative(new Date(task.due), new Date())}</Typography>
+                return <span style={{color: indigo[500]}}>Reminder at {formatRelative(new Date(task.due), new Date())}</span>
             } else {
                 // past
-                return <Typography color="error">Missed reminder {formatRelative(new Date(task.due), new Date())}</Typography>
+                return <span style={{color: red[500]}}>Missed reminder {formatRelative(new Date(task.due), new Date())}</span>
             }
         } else {
             return 'Updated at ' + formatRelative(new Date(task.updated), new Date())

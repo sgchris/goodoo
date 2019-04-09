@@ -28,6 +28,7 @@ class Todo extends Component {
     constructor(props) {
         super(props);
 
+        this.onTaskClick=this.onTaskClick.bind(this);
         this.onTaskCreate=this.onTaskCreate.bind(this);
         this.markTaskComplete=this.markTaskComplete.bind(this);
         this.onTaskDelete=this.onTaskDelete.bind(this);
@@ -93,6 +94,10 @@ class Todo extends Component {
                 () => this.getTasks()
             );
         }
+    }
+
+    onTaskClick(event, clickedTaskData) {
+        
     }
 
     onAddTaskButtonClicked = (event) => {
@@ -164,7 +169,6 @@ class Todo extends Component {
 
     // callback for the "show completed" switch
     onShowCompleted(showCompleted) {
-        console.log('showCompleted', showCompleted);
         this.setState(
             {showCompleted},
             () => this.getTasks()
@@ -177,7 +181,6 @@ class Todo extends Component {
                 <AddTaskDialog open={this.state.showAddTaskDialog} 
                     folderName={this.state.selectedFolder ? this.state.selectedFolder.title : ''}
                     callback={this.onTaskCreate}
-                    onClose={() => console.log('on close')}
                 />
                 <Grid container spacing={24}>
                     <Grid item xs={12} md={3}>
@@ -216,6 +219,7 @@ class Todo extends Component {
                             </Typography>
 
                             <TasksList tasks={this.state.tasks} 
+                                onTaskClick={this.onTaskClick}
                                 onTaskCreate={this.onTaskCreate}
                                 markTaskComplete={this.markTaskComplete}
                                 onTaskDelete={this.onTaskDelete}

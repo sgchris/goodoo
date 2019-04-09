@@ -35,7 +35,6 @@ class App extends Component {
         }
 
         const userData = signInStatus ? this.googleAuthInstance.getUserData() : null;
-        console.log('userData', userData);
         this.setState({
             isSignedIn: signInStatus,
             currentUser: userData ? userData.name : '',

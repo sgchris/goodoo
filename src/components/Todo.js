@@ -147,21 +147,21 @@ class Todo extends Component {
         // hide the dialog
         this.setState({showTaskDialog: false})
 
-        console.log('updated task data', taskData);
-        return;
+        // get the original task object
+        const resource = Object.assign({}, this.state.selectedTask);
 
-        // generate new resource
-        const resource = {
-            title: taskData.title,
-            status: "needsAction"
-        };
-
+        resource.title = taskData.title;
         if (taskData.addRemider) {
-            resource.due = taskData.date;
+            resource.due = new Date(taskData.date);
+        } else {
+            if ('due' in resource) {
+                delete resource.due;
+            }
         }
-
-        window.gapi.client.tasks.tasks.insert({
+        
+        window.gapi.client.tasks.tasks.update({
             tasklist: this.state.selectedFolder.id,
+            task: this.state.selectedTask.id,
             resource
         }).then(
             response => this.getTasks(), 
@@ -228,6 +228,7 @@ class Todo extends Component {
                     />
                 ) : (
                     <TaskDialog open={this.state.showTaskDialog} 
+                        taskId={this.state.selectedTask ? this.state.selectedTask.id : ''}
                         title={this.state.selectedTask ? this.state.selectedTask.title : ''}
                         date={this.state.selectedTask ? this.state.selectedTask.due : ''}
                         addRemider={this.state.selectedTask ? (!!this.state.selectedTask.due) : false}

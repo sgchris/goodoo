@@ -125,7 +125,7 @@ export default class TaskDialog extends React.Component {
                                 label="The task"
                                 type="text"
                                 fullWidth
-                                value={this.props.title}
+                                value={this.state.title}
                                 onChange={this.handleTitleChange}
                                 />
 
@@ -149,14 +149,14 @@ export default class TaskDialog extends React.Component {
                             </DialogContentText>
                             <MuiPickersUtilsProvider utils={DateFnsUtils}>
                                 <DatePicker
-                                    disabled={!this.props.addRemider}
+                                    disabled={!this.state.addRemider}
                                     margin="normal"
                                     label="Date picker"
                                     value={this.state.date}
                                     onChange={this.handleDateChange}
                                     />
                                 <TimePicker
-                                    disabled={!this.props.addRemider}
+                                    disabled={!this.state.addRemider}
                                     margin="normal"
                                     label="Time picker"
                                     value={this.state.date}

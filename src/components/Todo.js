@@ -30,6 +30,7 @@ class Todo extends Component {
         this.markTaskComplete=this.markTaskComplete.bind(this);
         this.onTaskDelete=this.onTaskDelete.bind(this);
         this.folderClick = this.folderClick.bind(this);
+        this.onTaskDialogClose = this.onTaskDialogClose.bind(this);
     }
 
     componentDidMount() {
@@ -145,7 +146,7 @@ class Todo extends Component {
 
     onTaskUpdate(taskData) {
         // hide the dialog
-        this.setState({showTaskDialog: false})
+        this.setState({showTaskDialog: false});
 
         // get the original task object
         const resource = Object.assign({}, this.state.selectedTask);
@@ -218,6 +219,8 @@ class Todo extends Component {
         );
     }
 
+    onTaskDialogClose = () => this.setState({showTaskDialog: false});
+
     render() {
         return (
             <div>
@@ -225,6 +228,7 @@ class Todo extends Component {
                     <TaskDialog open={this.state.showTaskDialog} 
                         folderName={this.state.selectedFolder ? this.state.selectedFolder.title : ''}
                         callback={this.onTaskCreate}
+                        onClose={this.onTaskDialogClose}
                     />
                 ) : (
                     <TaskDialog open={this.state.showTaskDialog} 
@@ -235,6 +239,7 @@ class Todo extends Component {
                         
                         folderName={this.state.selectedFolder ? this.state.selectedFolder.title : ''}
                         callback={this.onTaskUpdate}
+                        onClose={this.onTaskDialogClose}
                     />
                 )}
                 <Grid container spacing={24}>

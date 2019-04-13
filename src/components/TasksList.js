@@ -17,6 +17,14 @@ import red from '@material-ui/core/colors/red';
 
 class TasksList extends Component {
 
+    constructor(props) {
+        super(props);
+
+        this.onTaskClick = this.onTaskClick.bind(this);
+        this.onMarkComplete = this.onMarkComplete.bind(this);
+        this.onTaskDelete = this.onTaskDelete.bind(this);
+    }
+
     getTaskSecondRow(task) {
         if (task.status === 'completed') {
             return 'Completed at ' + formatRelative(new Date(task.completed), new Date());
@@ -33,24 +41,45 @@ class TasksList extends Component {
         }
     }
 
+    onTaskClick(event, taskData) {
+        if (this.props.onTaskClick) {
+            this.props.onTaskClick(taskData);
+        }
+    }
+
+    onMarkComplete(event, task, markAsNotComplete) {
+        event.stopPropagation();
+
+        if (this.props.markTaskComplete) {
+            this.props.markTaskComplete(task, markAsNotComplete);
+        }
+    }
+
+    onTaskDelete(event, taskData) {
+        event.stopPropagation();
+
+        if (this.props.onTaskDelete) {
+            this.props.onTaskDelete(taskData);
+        }
+    }
+
     render() {
         return (
             <div>  
                 <List>
                 { this.props.tasks.map(task => (
-                    <ListItem button key={task.id}>
+                    <ListItem button key={task.id} onClick={event => this.onTaskClick(event, task)}>
                         { task.status === "completed" ?  (
                             <IconButton title="Task completed. Click to mark as uncompleted"
-                                onClick={event => this.props.markTaskComplete(event, task, 'mark as not completed')}>
+                                onClick={event => this.onMarkComplete(event, task, 'mark as not completed')}>
                                 <Avatar><DoneOutlineIcon /></Avatar>
                             </IconButton>
                         ) : (
-                                <IconButton title="Mark complete" 
-                                    onClick={event => this.props.markTaskComplete(event, task)}>
-                                    <Avatar style={{background: indigo[500]}}><DoneIcon /></Avatar>
-                                </IconButton>
-                            )
-                        }
+                            <IconButton title="Mark complete" 
+                                onClick={event => this.onMarkComplete(event, task)}>
+                                <Avatar style={{background: indigo[500]}}><DoneIcon /></Avatar>
+                            </IconButton>
+                        )}
                         <ListItemText primary={
                             <React.Fragment>
                                 { task.status === "completed" ? <strike>{task.title}</strike> : task.title}
@@ -61,7 +90,7 @@ class TasksList extends Component {
                             </React.Fragment>
                         } />
                         <ListItemSecondaryAction>
-                            <IconButton aria-label="Delete" onClick={event => this.props.onTaskDelete(event, task)}>
+                            <IconButton aria-label="Delete" onClick={event => this.onTaskDelete(event, task)}>
                                 <DeleteIcon />
                             </IconButton>
                         </ListItemSecondaryAction>

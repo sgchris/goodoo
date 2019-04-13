@@ -3,13 +3,7 @@ import React, { Component } from 'react'
 import Grid from '@material-ui/core/Grid';
 import TasksList from './TasksList';
 import FoldersList from './FoldersList';
-import AddTaskDialog from './../dialogs/AddTaskDialog';
-
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import Avatar from '@material-ui/core/Avatar';
-import WorkIcon from '@material-ui/icons/Work';
+import TaskDialog, { DIALOG_TYPES } from './../dialogs/TaskDialog';
 import Typography from '@material-ui/core/Typography';
 import Switch from '@material-ui/core/Switch';
 import Fab from '@material-ui/core/Fab';
@@ -18,21 +12,23 @@ import AddIcon from '@material-ui/icons/Add';
 class Todo extends Component {
 
     state = {
+        dialogType: DIALOG_TYPES.DIALOG_TYPE_CREATE,
         selectedFolder: null,
+        selectedTask: null,
         folders: [],
         tasks: [],
         showCompleted: false,
-        showAddTaskDialog: false,
+        showTaskDialog: false,
     };
 
     constructor(props) {
         super(props);
 
         this.onTaskClick=this.onTaskClick.bind(this);
+        this.onTaskUpdate=this.onTaskUpdate.bind(this);
         this.onTaskCreate=this.onTaskCreate.bind(this);
         this.markTaskComplete=this.markTaskComplete.bind(this);
         this.onTaskDelete=this.onTaskDelete.bind(this);
-
         this.folderClick = this.folderClick.bind(this);
     }
 
@@ -96,22 +92,42 @@ class Todo extends Component {
         }
     }
 
-    onTaskClick(event, clickedTaskData) {
+    onTaskClick(clickedTaskData) {
+        // find the selected task
+        let selectedTask = this.state.tasks.reduce((prevTask, currentTask) => {
+            return (currentTask.id === clickedTaskData.id) ? currentTask : prevTask;
+        });
         
+        let that = this;
+        console.log('selectedTask', selectedTask);
+        this.setState({
+            selectedTask
+        }, () => {
+            that.setState({
+                dialogType: DIALOG_TYPES.DIALOG_TYPE_EDIT,
+            }, () => {
+                that.setState({
+                    showTaskDialog: true
+                });
+            });
+        })
     }
 
     onAddTaskButtonClicked = (event) => {
-        this.setState({showAddTaskDialog: true})
+        this.setState({
+            dialogType: DIALOG_TYPES.DIALOG_TYPE_CREATE,
+            showTaskDialog: true
+        })
     }
 
     onTaskCreate(newTaskData) {
         // hide the dialog
-        this.setState({showAddTaskDialog: false})
+        this.setState({showTaskDialog: false})
 
         // generate new resource
         const resource = {
             title: newTaskData.title,
-            statue: "needsAction"
+            status: "needsAction"
         };
 
         if (newTaskData.addRemider) {
@@ -127,39 +143,66 @@ class Todo extends Component {
         );
     }
 
-    markTaskComplete(_, clickedTaskData, markAsNotComplete) {
-        if (!clickedTaskData || !clickedTaskData.id) {
-            return false;
+    onTaskUpdate(taskData) {
+        // hide the dialog
+        this.setState({showTaskDialog: false})
+
+        console.log('updated task data', taskData);
+        return;
+
+        // generate new resource
+        const resource = {
+            title: taskData.title,
+            status: "needsAction"
+        };
+
+        if (taskData.addRemider) {
+            resource.due = taskData.date;
         }
 
-        // update the task object
-        if (markAsNotComplete) { // check if the opposite action required
-            clickedTaskData.status = "needsAction";
-            if ("completed" in clickedTaskData) {
-                delete clickedTaskData.completed;
-            }
-        } else {
-            clickedTaskData.status = "completed";
-            clickedTaskData.completed = new Date();
-        }
-        
-        window.gapi.client.tasks.tasks.update({
-            task: clickedTaskData.id,
+        window.gapi.client.tasks.tasks.insert({
             tasklist: this.state.selectedFolder.id,
-            resource: clickedTaskData
+            resource
         }).then(
             response => this.getTasks(), 
             err => console.error("Execute error", err)
         );
     }
 
-    onTaskDelete(_, clickedTaskData) {
-        if (!clickedTaskData || !clickedTaskData.id) {
+    markTaskComplete(taskData, markAsNotComplete) {
+
+        if (!taskData || !taskData.id) {
+            return false;
+        }
+
+        // update the task object
+        if (markAsNotComplete) { // check if the opposite action required
+            taskData.status = "needsAction";
+            if ("completed" in taskData) {
+                delete taskData.completed;
+            }
+        } else {
+            taskData.status = "completed";
+            taskData.completed = new Date();
+        }
+        
+        window.gapi.client.tasks.tasks.update({
+            task: taskData.id,
+            tasklist: this.state.selectedFolder.id,
+            resource: taskData
+        }).then(
+            response => this.getTasks(), 
+            err => console.error("Execute error", err)
+        );
+    }
+
+    onTaskDelete(taskData) {
+        if (!taskData || !taskData.id) {
             return false;
         }
 
         window.gapi.client.tasks.tasks.delete({
-            task: clickedTaskData.id,
+            task: taskData.id,
             tasklist: this.state.selectedFolder.id,
         }).then(
             response => this.getTasks(), 
@@ -178,10 +221,21 @@ class Todo extends Component {
     render() {
         return (
             <div>
-                <AddTaskDialog open={this.state.showAddTaskDialog} 
-                    folderName={this.state.selectedFolder ? this.state.selectedFolder.title : ''}
-                    callback={this.onTaskCreate}
-                />
+                { this.state.dialogType === DIALOG_TYPES.DIALOG_TYPE_CREATE ? (
+                    <TaskDialog open={this.state.showTaskDialog} 
+                        folderName={this.state.selectedFolder ? this.state.selectedFolder.title : ''}
+                        callback={this.onTaskCreate}
+                    />
+                ) : (
+                    <TaskDialog open={this.state.showTaskDialog} 
+                        title={this.state.selectedTask ? this.state.selectedTask.title : ''}
+                        date={this.state.selectedTask ? this.state.selectedTask.due : ''}
+                        addRemider={this.state.selectedTask ? (!!this.state.selectedTask.due) : false}
+                        
+                        folderName={this.state.selectedFolder ? this.state.selectedFolder.title : ''}
+                        callback={this.onTaskUpdate}
+                    />
+                )}
                 <Grid container spacing={24}>
                     <Grid item xs={12} md={3}>
                         <Typography variant="title" color="inherit" style={{padding: '30px' }}>

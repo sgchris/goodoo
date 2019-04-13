@@ -6,7 +6,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-
+ 
 import 'date-fns';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
@@ -16,15 +16,19 @@ import { MuiPickersUtilsProvider, TimePicker, DatePicker } from 'material-ui-pic
 import { Checkbox } from '@material-ui/core';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 
+export const DIALOG_TYPES = {
+    DIALOG_TYPE_CREATE: 'dialog_type_create',
+    DIALOG_TYPE_EDIT: 'dialog_type_edit',
+};
+
 const initialState = {
-    isEdit: false,
     open: false,
     addRemider: false,
     date: new Date(),
     title: '',
 }
 
-export default class AddTaskDialog extends React.Component {
+export default class TaskDialog extends React.Component {
     taskTitle = '';
     taskDate = null;
     taskTime = null;
@@ -32,23 +36,48 @@ export default class AddTaskDialog extends React.Component {
     constructor(props) {
         super(props);
         this.state = initialState;
+
+        // read initial values from props (in case of "edit")
+        this.state.title = this.props.title || this.state.title;
+        this.state.date = this.props.date || this.state.date;
+        this.state.addRemider = this.props.addRemider || this.state.addRemider;
+        
+
+        this.handleTitleChange = this.handleTitleChange.bind(this);
+        this.handleAddReminderChange = this.handleAddReminderChange.bind(this);
+        this.handleDateChange = this.handleDateChange.bind(this);
     }
 
     componentDidMount() {
-        this.setState({open: this.props.open});
-
-        if (this.props.task) {
-            this.setState({isEdit: true});
-        }
+        this.setState({
+            open: this.props.open,
+            title: this.props.title,
+            date: this.props.date,
+            addRemider: this.props.addRemider,
+        });
     }
 
     componentWillReceiveProps(nextProps) {
+        let newState = {};
         if (nextProps.open !== this.state.open) {
-          this.setState({ open: nextProps.open });
+            newState.open = nextProps.open;
         }
+        if (nextProps.title !== this.state.title) {
+            newState.title = nextProps.title;
+        }
+        if (nextProps.date !== this.state.date) {
+            newState.date = nextProps.date;
+        }
+        if (nextProps.addRemider !== this.state.addRemider) {
+            newState.addRemider = nextProps.addRemider;
+        }
+
+        this.setState(newState);
     }
 
-    handleDateChange = date => this.setState({date});
+    handleDateChange = date => {
+        this.setState({date})
+    }
 
     handleTitleChange = event => this.setState({title: event.target.value});
 
@@ -59,6 +88,8 @@ export default class AddTaskDialog extends React.Component {
             this.props.onClose();
         }
     }
+
+    handleAddReminderChange = event => this.setState({addRemider: event.target.checked});
 
     handleCallback = () => {
         if (this.props.callback) {
@@ -94,7 +125,7 @@ export default class AddTaskDialog extends React.Component {
                                 label="The task"
                                 type="text"
                                 fullWidth
-                                value={this.state.title}
+                                value={this.props.title}
                                 onChange={this.handleTitleChange}
                                 />
 
@@ -104,7 +135,12 @@ export default class AddTaskDialog extends React.Component {
                                         <Checkbox 
                                             color="primary"
                                             style={{marginRight: '10px'}} 
-                                            onChange={event => this.setState({addRemider: event.target.checked})}
+                                            onChange={
+                                                event => {
+                                                    console.log('is checked:', event.target.checked);
+                                                    this.setState({addRemider: event.target.checked})
+                                                }
+                                            }
                                             checked={this.state.addRemider} 
                                         />
                                     )}
@@ -113,14 +149,14 @@ export default class AddTaskDialog extends React.Component {
                             </DialogContentText>
                             <MuiPickersUtilsProvider utils={DateFnsUtils}>
                                 <DatePicker
-                                    disabled={!this.state.addRemider}
+                                    disabled={!this.props.addRemider}
                                     margin="normal"
                                     label="Date picker"
                                     value={this.state.date}
                                     onChange={this.handleDateChange}
                                     />
                                 <TimePicker
-                                    disabled={!this.state.addRemider}
+                                    disabled={!this.props.addRemider}
                                     margin="normal"
                                     label="Time picker"
                                     value={this.state.date}
@@ -134,7 +170,7 @@ export default class AddTaskDialog extends React.Component {
                             Cancel
                         </Button>
                         <Button type="submit" onClick={this.handleCallback} color="primary">
-                            Add
+                            { this.props.title ? 'Update' : 'Add' }
                         </Button>
                     </DialogActions>
                 </Dialog>

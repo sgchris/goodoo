@@ -150,10 +150,10 @@ class Todo extends Component {
 
         // get the original task object
         const resource = Object.assign({}, this.state.selectedTask);
-
         resource.title = taskData.title;
+        resource.status = "needsAction";
         if (taskData.addRemider) {
-            resource.due = new Date(taskData.date);
+            resource.due = taskData.date;
         } else {
             if ('due' in resource) {
                 delete resource.due;
@@ -171,7 +171,7 @@ class Todo extends Component {
     }
 
     onMarkTaskComplete(taskData, markAsNotComplete) {
-        
+
         if (!taskData || !taskData.id) {
             return false;
         }

@@ -93,11 +93,13 @@ export default class TaskDialog extends React.Component {
 
     handleCallback = () => {
         if (this.props.callback) {
-            this.props.callback({
+            let newData = {
                 title: this.state.title,
-                date: this.state.date,
+                date: this.state.date && this.state.date.toISOString ? this.state.date.toISOString() : null,
                 addRemider: this.state.addRemider,
-            });
+            };
+
+            this.props.callback(newData);
         }
 
         this.setState(initialState);

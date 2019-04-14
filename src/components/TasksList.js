@@ -50,8 +50,8 @@ class TasksList extends Component {
     onMarkComplete(event, task, markAsNotComplete) {
         event.stopPropagation();
 
-        if (this.props.markTaskComplete) {
-            this.props.markTaskComplete(task, markAsNotComplete);
+        if (this.props.onMarkTaskComplete) {
+            this.props.onMarkTaskComplete(task, markAsNotComplete);
         }
     }
 

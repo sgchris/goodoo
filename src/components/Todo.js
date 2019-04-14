@@ -25,9 +25,9 @@ class Todo extends Component {
         super(props);
 
         this.onTaskClick=this.onTaskClick.bind(this);
-        this.onTaskUpdate=this.onTaskUpdate.bind(this);
+        this.taskUpdate=this.taskUpdate.bind(this);
         this.onTaskCreate=this.onTaskCreate.bind(this);
-        this.markTaskComplete=this.markTaskComplete.bind(this);
+        this.onMarkTaskComplete=this.onMarkTaskComplete.bind(this);
         this.onTaskDelete=this.onTaskDelete.bind(this);
         this.folderClick = this.folderClick.bind(this);
         this.onTaskDialogClose = this.onTaskDialogClose.bind(this);
@@ -36,6 +36,15 @@ class Todo extends Component {
     componentDidMount() {
         // get list of tasks folders
         this.getFolders();
+    }
+
+    folderClick(event, clickedFolderData) {
+        if (clickedFolderData) {
+            this.setState(
+                {selectedFolder: clickedFolderData}, 
+                () => this.getTasks()
+            );
+        }
     }
 
     // get tasks folders from google
@@ -84,13 +93,11 @@ class Todo extends Component {
         })
     }
 
-    folderClick(event, clickedFolderData) {
-        if (clickedFolderData) {
-            this.setState(
-                {selectedFolder: clickedFolderData}, 
-                () => this.getTasks()
-            );
-        }
+    onAddTaskButtonClicked = (event) => {
+        this.setState({
+            dialogType: DIALOG_TYPES.DIALOG_TYPE_CREATE,
+            showTaskDialog: true
+        })
     }
 
     onTaskClick(clickedTaskData) {
@@ -111,13 +118,6 @@ class Todo extends Component {
                     showTaskDialog: true
                 });
             });
-        })
-    }
-
-    onAddTaskButtonClicked = (event) => {
-        this.setState({
-            dialogType: DIALOG_TYPES.DIALOG_TYPE_CREATE,
-            showTaskDialog: true
         })
     }
 
@@ -144,7 +144,7 @@ class Todo extends Component {
         );
     }
 
-    onTaskUpdate(taskData) {
+    taskUpdate(taskData) {
         // hide the dialog
         this.setState({showTaskDialog: false});
 
@@ -162,7 +162,7 @@ class Todo extends Component {
         
         window.gapi.client.tasks.tasks.update({
             tasklist: this.state.selectedFolder.id,
-            task: this.state.selectedTask.id,
+            task: this.state.selectedTask.id, 
             resource
         }).then(
             response => this.getTasks(), 
@@ -170,8 +170,8 @@ class Todo extends Component {
         );
     }
 
-    markTaskComplete(taskData, markAsNotComplete) {
-
+    onMarkTaskComplete(taskData, markAsNotComplete) {
+        
         if (!taskData || !taskData.id) {
             return false;
         }
@@ -238,7 +238,7 @@ class Todo extends Component {
                         addRemider={this.state.selectedTask ? (!!this.state.selectedTask.due) : false}
                         
                         folderName={this.state.selectedFolder ? this.state.selectedFolder.title : ''}
-                        callback={this.onTaskUpdate}
+                        callback={this.taskUpdate}
                         onClose={this.onTaskDialogClose}
                     />
                 )}
@@ -281,7 +281,7 @@ class Todo extends Component {
                             <TasksList tasks={this.state.tasks} 
                                 onTaskClick={this.onTaskClick}
                                 onTaskCreate={this.onTaskCreate}
-                                markTaskComplete={this.markTaskComplete}
+                                onMarkTaskComplete={this.onMarkTaskComplete}
                                 onTaskDelete={this.onTaskDelete}
                             />
                         </Grid>

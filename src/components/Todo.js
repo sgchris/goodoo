@@ -43,7 +43,9 @@ class Todo extends Component {
         this.onTaskDelete=this.onTaskDelete.bind(this);
         
         this.onFolderClick = this.onFolderClick.bind(this);
-        this.onFolderRename = this.onFolderRename.bind(this);
+        this.onFolderRenameClick = this.onFolderRenameClick.bind(this);
+        this.folderUpdate = this.folderUpdate.bind(this);
+
         this.onFolderCreate = this.onFolderCreate.bind(this);
         this.onFolderDelete = this.onFolderDelete.bind(this);
 
@@ -144,10 +146,11 @@ class Todo extends Component {
         })
     }
 
-    onFolderRename(clickedFolderData) {
+    // show the rename dialog
+    onFolderRenameClick(folderData) {
         // find the selected task
         let clickedFolder = this.state.folders.reduce((prevFolder, currentFolder) => {
-            return (currentFolder.id === clickedFolderData.id) ? currentFolder : prevFolder;
+            return (currentFolder.id === folderData.id) ? currentFolder : prevFolder;
         });
         
         let that = this;
@@ -347,7 +350,7 @@ class Todo extends Component {
                 ) : (
                     <FolderDialog open={this.state.showFolderDialog} 
                         title={this.state.clickedFolder ? this.state.clickedFolder.title : ''}
-                        callback={this.onFolderRename}
+                        callback={this.folderUpdate}
                         onClose={this.onDialogClose}
                     />
                 )}
@@ -366,7 +369,7 @@ class Todo extends Component {
                         <FoldersList folders={this.state.folders} 
                             selectedFolderId={this.state.selectedFolder ? this.state.selectedFolder.id : null} 
                             onFolderClick={this.onFolderClick} 
-                            onFolderRename={this.onFolderRename} 
+                            onFolderRename={this.onFolderRenameClick} 
                             folderDelete={this.folderDelete} 
                         />
                     </Grid>

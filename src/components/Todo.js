@@ -3,7 +3,8 @@ import React, { Component } from 'react'
 import Grid from '@material-ui/core/Grid';
 import TasksList from './TasksList';
 import FoldersList from './FoldersList';
-import TaskDialog, { DIALOG_TYPES } from './../dialogs/TaskDialog';
+import TaskDialog, { DIALOG_TYPES as TASK_DIALOG_TYPES } from './../dialogs/TaskDialog';
+import FolderDialog, { DIALOG_TYPES as FOLDER_DIALOG_TYPES} from './../dialogs/FolderDialog';
 import Typography from '@material-ui/core/Typography';
 import Switch from '@material-ui/core/Switch';
 import Fab from '@material-ui/core/Fab';
@@ -12,13 +13,24 @@ import AddIcon from '@material-ui/icons/Add';
 class Todo extends Component {
 
     state = {
-        dialogType: DIALOG_TYPES.DIALOG_TYPE_CREATE,
         selectedFolder: null,
-        selectedTask: null,
+        
         folders: [],
         tasks: [],
+        
+        // show completed tasks switch 
+        // TODO: read from cookie
         showCompleted: false,
+        
+        // task dialog related
         showTaskDialog: false,
+        selectedTask: null,
+        taskDialogType: TASK_DIALOG_TYPES.DIALOG_TYPE_CREATE,
+
+        // folder dialog related
+        showFolderDialog: false,
+        folderDialogType: FOLDER_DIALOG_TYPES.DIALOG_TYPE_CREATE,
+        clickedFolder: null,
     };
 
     constructor(props) {
@@ -29,8 +41,13 @@ class Todo extends Component {
         this.onTaskCreate=this.onTaskCreate.bind(this);
         this.onMarkTaskComplete=this.onMarkTaskComplete.bind(this);
         this.onTaskDelete=this.onTaskDelete.bind(this);
-        this.folderClick = this.folderClick.bind(this);
-        this.onTaskDialogClose = this.onTaskDialogClose.bind(this);
+        
+        this.onFolderClick = this.onFolderClick.bind(this);
+        this.onFolderRename = this.onFolderRename.bind(this);
+        this.onFolderCreate = this.onFolderCreate.bind(this);
+        this.onFolderDelete = this.onFolderDelete.bind(this);
+
+        this.onDialogClose = this.onDialogClose.bind(this);
     }
 
     componentDidMount() {
@@ -38,7 +55,7 @@ class Todo extends Component {
         this.getFolders();
     }
 
-    folderClick(event, clickedFolderData) {
+    onFolderClick(clickedFolderData) {
         if (clickedFolderData) {
             this.setState(
                 {selectedFolder: clickedFolderData}, 
@@ -69,9 +86,9 @@ class Todo extends Component {
                     let selectedFolder = foldersList[0];
                     that.setState({
                         selectedFolder
+                    }, () => {
+                        that.getTasks();
                     });
-
-                    that.getTasks();
                 }
             }
         });
@@ -95,8 +112,15 @@ class Todo extends Component {
 
     onAddTaskButtonClicked = (event) => {
         this.setState({
-            dialogType: DIALOG_TYPES.DIALOG_TYPE_CREATE,
+            taskDialogType: TASK_DIALOG_TYPES.DIALOG_TYPE_CREATE,
             showTaskDialog: true
+        })
+    }
+
+    onAddFolderButtonClicked = (event) => {
+        this.setState({
+            folderDialogType: FOLDER_DIALOG_TYPES.DIALOG_TYPE_CREATE,
+            showFolderDialog: true
         })
     }
 
@@ -107,15 +131,34 @@ class Todo extends Component {
         });
         
         let that = this;
-        console.log('selectedTask', selectedTask);
         this.setState({
             selectedTask
         }, () => {
             that.setState({
-                dialogType: DIALOG_TYPES.DIALOG_TYPE_EDIT,
+                taskDialogType: TASK_DIALOG_TYPES.DIALOG_TYPE_EDIT,
             }, () => {
                 that.setState({
                     showTaskDialog: true
+                });
+            });
+        })
+    }
+
+    onFolderRename(clickedFolderData) {
+        // find the selected task
+        let clickedFolder = this.state.folders.reduce((prevFolder, currentFolder) => {
+            return (currentFolder.id === clickedFolderData.id) ? currentFolder : prevFolder;
+        });
+        
+        let that = this;
+        this.setState({
+            clickedFolder
+        }, () => {
+            that.setState({
+                folderDialogType: FOLDER_DIALOG_TYPES.DIALOG_TYPE_EDIT,
+            }, () => {
+                that.setState({
+                    showFolderDialog: true
                 });
             });
         })
@@ -144,6 +187,24 @@ class Todo extends Component {
         );
     }
 
+    onFolderCreate(newFolderData) {
+        // hide the dialog
+        this.setState({showFolderDialog: false})
+
+        // generate new resource
+        const resource = {
+            title: newFolderData.title
+        };
+
+        window.gapi.client.tasks.tasklists.insert({
+            tasklist: this.state.selectedFolder.id,
+            resource
+        }).then(
+            response => this.getFolders(), 
+            err => console.error("Execute error", err)
+        );
+    }
+
     taskUpdate(taskData) {
         // hide the dialog
         this.setState({showTaskDialog: false});
@@ -166,6 +227,23 @@ class Todo extends Component {
             resource
         }).then(
             response => this.getTasks(), 
+            err => console.error("Execute error", err)
+        );
+    }
+
+    folderUpdate(folderData) {
+        // hide the dialog
+        this.setState({showFolderDialog: false});
+
+        // get the original folder object
+        const resource = Object.assign({}, this.state.clickedFolder);
+        resource.title = folderData.title;
+        
+        window.gapi.client.tasks.tasklists.update({
+            tasklist: this.state.clickedFolder.id,
+            resource
+        }).then(
+            response => this.getFolders(), 
             err => console.error("Execute error", err)
         );
     }
@@ -211,6 +289,19 @@ class Todo extends Component {
         );
     }
 
+    onFolderDelete(folderData) {
+        if (!folderData || !folderData.id) {
+            return false;
+        }
+
+        window.gapi.client.tasks.tasklists.delete({
+            tasklist: folderData.id,
+        }).then(
+            response => this.getFolders(), 
+            err => console.error("Execute error", err)
+        );
+    }
+
     // callback for the "show completed" switch
     onShowCompleted(showCompleted) {
         this.setState(
@@ -219,16 +310,20 @@ class Todo extends Component {
         );
     }
 
-    onTaskDialogClose = () => this.setState({showTaskDialog: false});
+    onDialogClose = () => this.setState({
+        showTaskDialog: false,
+        showFolderDialog: false,
+    });
 
     render() {
         return (
             <div>
-                { this.state.dialogType === DIALOG_TYPES.DIALOG_TYPE_CREATE ? (
+                { /* Task Dialog (create/edit) */}
+                { this.state.taskDialogType === TASK_DIALOG_TYPES.DIALOG_TYPE_CREATE ? (
                     <TaskDialog open={this.state.showTaskDialog} 
                         folderName={this.state.selectedFolder ? this.state.selectedFolder.title : ''}
                         callback={this.onTaskCreate}
-                        onClose={this.onTaskDialogClose}
+                        onClose={this.onDialogClose}
                     />
                 ) : (
                     <TaskDialog open={this.state.showTaskDialog} 
@@ -239,13 +334,27 @@ class Todo extends Component {
                         
                         folderName={this.state.selectedFolder ? this.state.selectedFolder.title : ''}
                         callback={this.taskUpdate}
-                        onClose={this.onTaskDialogClose}
+                        onClose={this.onDialogClose}
+                    />
+                )}
+
+                { /* Folder Dialog (create/edit) */}
+                { this.state.folderDialogType === FOLDER_DIALOG_TYPES.DIALOG_TYPE_CREATE ? (
+                    <FolderDialog open={this.state.showFolderDialog} 
+                        callback={this.onFolderCreate}
+                        onClose={this.onDialogClose}
+                    />
+                ) : (
+                    <FolderDialog open={this.state.showFolderDialog} 
+                        title={this.state.clickedFolder ? this.state.clickedFolder.title : ''}
+                        callback={this.onFolderRename}
+                        onClose={this.onDialogClose}
                     />
                 )}
                 <Grid container spacing={24}>
                     <Grid item xs={12} md={3}>
                         <Typography variant="title" color="inherit" style={{padding: '30px' }}>
-                            Tasks lists 
+                            Folders 
                             <Fab size="small" color="secondary" 
                                 style={{marginLeft: '10px'}}
                                 aria-label="Add" 
@@ -256,7 +365,9 @@ class Todo extends Component {
                         </Typography>
                         <FoldersList folders={this.state.folders} 
                             selectedFolderId={this.state.selectedFolder ? this.state.selectedFolder.id : null} 
-                            folderClick={this.folderClick} 
+                            onFolderClick={this.onFolderClick} 
+                            onFolderRename={this.onFolderRename} 
+                            folderDelete={this.folderDelete} 
                         />
                     </Grid>
                     { this.state.selectedFolder ? (

@@ -11,7 +11,6 @@ import DoneOutlineIcon from '@material-ui/icons/DoneOutline';
 import DeleteIcon from '@material-ui/icons/Delete';
 import indigo from '@material-ui/core/colors/indigo';
 import {formatRelative} from 'date-fns';
-import { Typography } from '@material-ui/core';
 
 import red from '@material-ui/core/colors/red';
 

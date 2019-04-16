@@ -10,6 +10,8 @@ import {formatRelative} from 'date-fns';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 
+import ConfirmationBox from '../services/ConfirmationBox';
+
 class FoldersList extends Component {
 
     constructor(props) {
@@ -54,9 +56,13 @@ class FoldersList extends Component {
                         } />
 
                         <ListItemSecondaryAction>
-                            <IconButton aria-label="Delete" onClick={event => this.onFolderDelete(event, folder)}>
-                                <DeleteIcon />
-                            </IconButton>
+                            <ConfirmationBox title="Delete folder" content="This will delete all the tasks in that folder. Are you sure?">
+                            {confirm => (
+                                <IconButton aria-label="Delete" onClick={event => confirm(() => this.onFolderDelete(event, folder))}>
+                                    <DeleteIcon />
+                                </IconButton>
+                            )}
+                            </ConfirmationBox>
                         </ListItemSecondaryAction>
                     </ListItem>
                 ))}

@@ -69,8 +69,9 @@ export default class FolderDialog extends React.Component {
     }
 
     handleCallback = event => {
-        console.log('handleCallback. event:', event);
-        event.stopPropagation();
+        event.preventDefault();
+        
+        this.setState({open: false});
         
         if (this.props.callback) {
             let newData = {
@@ -79,8 +80,6 @@ export default class FolderDialog extends React.Component {
 
             this.props.callback(newData);
         }
-
-        this.setState(initialState);
 
         return false;
     }
@@ -95,31 +94,31 @@ export default class FolderDialog extends React.Component {
                     onClose={this.handleClose}
                     aria-labelledby="form-dialog-title"
                 >
-                    <DialogTitle id="form-dialog-title">
-                        Add Folder
-                    </DialogTitle>
-                    <DialogContent>
-                        <form onSubmit={this.handleCallback}>
-                            <TextField
-                                autoFocus
-                                margin="dense"
-                                id="name"
-                                label="Folder name"
-                                type="text"
-                                fullWidth
-                                value={this.state.title}
-                                onChange={this.handleTitleChange}
-                                />
-                        </form>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button type="button" onClick={this.handleClose} color="primary">
-                            Cancel
-                        </Button>
-                        <Button type="submit" onClick={this.handleCallback} color="primary">
-                            { this.props.title ? 'Update' : 'Add' }
-                        </Button>
-                    </DialogActions>
+                    <form onSubmit={this.handleCallback}>
+                        <DialogTitle id="form-dialog-title">
+                            Add Folder
+                        </DialogTitle>
+                        <DialogContent>
+                                <TextField
+                                    autoFocus
+                                    margin="dense"
+                                    id="name"
+                                    label="Folder name"
+                                    type="text"
+                                    fullWidth
+                                    value={this.state.title}
+                                    onChange={this.handleTitleChange}
+                                    />
+                        </DialogContent>
+                        <DialogActions>
+                            <Button type="button" onClick={this.handleClose} color="primary">
+                                Cancel
+                            </Button>
+                            <Button type="submit" color="primary">
+                                { this.props.title ? 'Update' : 'Add' }
+                            </Button>
+                        </DialogActions>
+                    </form>
                 </Dialog>
             </div>
         );

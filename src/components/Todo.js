@@ -200,7 +200,6 @@ class Todo extends Component {
         };
 
         window.gapi.client.tasks.tasklists.insert({
-            tasklist: this.state.selectedFolder.id,
             resource
         }).then(
             response => this.getFolders(), 
@@ -362,6 +361,7 @@ class Todo extends Component {
                                 style={{marginLeft: '10px'}}
                                 aria-label="Add" 
                                 title="Add folder" 
+                                onClick={this.onAddFolderButtonClicked}
                             >
                                 <AddIcon />
                             </Fab>

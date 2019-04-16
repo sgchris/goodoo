@@ -38,6 +38,7 @@ export default class FolderDialog extends React.Component {
 
         // bind
         this.handleTitleChange = this.handleTitleChange.bind(this);
+        this.handleCallback = this.handleCallback.bind(this);
     }
 
     componentDidMount() {
@@ -69,6 +70,7 @@ export default class FolderDialog extends React.Component {
     }
 
     handleCallback = event => {
+        console.log('handleCallback');
         event.preventDefault();
         
         this.setState({open: false});
@@ -77,7 +79,7 @@ export default class FolderDialog extends React.Component {
             let newData = {
                 title: this.state.title
             };
-
+            console.log('calling callback with ', newData);
             this.props.callback(newData);
         }
 
@@ -99,23 +101,23 @@ export default class FolderDialog extends React.Component {
                             Add Folder
                         </DialogTitle>
                         <DialogContent>
-                                <TextField
-                                    autoFocus
-                                    margin="dense"
-                                    id="name"
-                                    label="Folder name"
-                                    type="text"
-                                    fullWidth
-                                    value={this.state.title}
-                                    onChange={this.handleTitleChange}
-                                    />
+                            <TextField
+                                autoFocus
+                                margin="dense"
+                                id="name"
+                                label="Folder name"
+                                type="text"
+                                fullWidth
+                                value={this.state.title}
+                                onChange={this.handleTitleChange}
+                                />
                         </DialogContent>
                         <DialogActions>
                             <Button type="button" onClick={this.handleClose} color="primary">
                                 Cancel
                             </Button>
                             <Button type="submit" color="primary">
-                                { this.props.title ? 'Update' : 'Add' }
+                                { 'title' in this.props ? 'Update' : 'Add' }
                             </Button>
                         </DialogActions>
                     </form>

@@ -106,8 +106,11 @@ class Todo extends Component {
             tasklist: this.state.selectedFolder.id,
             showCompleted: this.state.showCompleted
         }).then(response => {
-            if (response.status === 200 && response.result.items) {
-                this.setState({tasks:response.result.items});
+            if (response.status === 200) {
+                this.setState({
+                    tasks: (response.result.items && response.result.items.length > 0) ? 
+                        response.result.items : []
+                });
             }
         })
     }

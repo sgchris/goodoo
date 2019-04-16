@@ -84,7 +84,7 @@ class Todo extends Component {
                     folders: foldersList
                 });
 
-                if (foldersList && foldersList.length > 0) {
+                if (!that.state.selectedFolder && foldersList && foldersList.length > 0) {
                     let selectedFolder = foldersList[0];
                     that.setState({
                         selectedFolder

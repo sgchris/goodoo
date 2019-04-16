@@ -369,6 +369,7 @@ class Todo extends Component {
                         <FoldersList folders={this.state.folders} 
                             selectedFolderId={this.state.selectedFolder ? this.state.selectedFolder.id : null} 
                             onFolderClick={this.onFolderClick} 
+                            onFolderDelete={this.onFolderDelete} 
                             onFolderRename={this.onFolderRenameClick} 
                             folderDelete={this.folderDelete} 
                         />

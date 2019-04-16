@@ -3,11 +3,12 @@ import React, { Component } from 'react'
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import Avatar from '@material-ui/core/Avatar';
 import CreateIcon from '@material-ui/icons/Create';
 import {formatRelative} from 'date-fns';
 import IconButton from '@material-ui/core/IconButton';
-
+import DeleteIcon from '@material-ui/icons/Delete';
 
 class FoldersList extends Component {
 
@@ -51,6 +52,12 @@ class FoldersList extends Component {
                                 Last updated at {formatRelative(new Date(folder.updated), new Date())}
                             </React.Fragment>
                         } />
+
+                        <ListItemSecondaryAction>
+                            <IconButton aria-label="Delete" onClick={event => this.onFolderDelete(event, folder)}>
+                                <DeleteIcon />
+                            </IconButton>
+                        </ListItemSecondaryAction>
                     </ListItem>
                 ))}
                 </List>

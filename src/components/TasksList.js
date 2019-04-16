@@ -11,6 +11,7 @@ import DoneOutlineIcon from '@material-ui/icons/DoneOutline';
 import DeleteIcon from '@material-ui/icons/Delete';
 import indigo from '@material-ui/core/colors/indigo';
 import {formatRelative} from 'date-fns';
+import ConfirmationBox from './../services/ConfirmationBox';
 
 import red from '@material-ui/core/colors/red';
 
@@ -89,9 +90,13 @@ class TasksList extends Component {
                             </React.Fragment>
                         } />
                         <ListItemSecondaryAction>
-                            <IconButton aria-label="Delete" onClick={event => this.onTaskDelete(event, task)}>
+                        <ConfirmationBox title="Delete task">
+                        {confirm => (
+                            <IconButton aria-label="Delete" onClick={event => confirm(() => this.onTaskDelete(event, task))}>
                                 <DeleteIcon />
                             </IconButton>
+                        )}
+                        </ConfirmationBox>
                         </ListItemSecondaryAction>
                     </ListItem>
                 ))}

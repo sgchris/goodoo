@@ -10,7 +10,7 @@ import {formatRelative} from 'date-fns';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 
-import ConfirmationBox from '../services/ConfirmationBox';
+import ConfirmationBox from './../services/ConfirmationBox';
 
 class FoldersList extends Component {
 

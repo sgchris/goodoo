@@ -73,18 +73,27 @@ class Todo extends Component {
             'maxResults': 100
         }).then((response) => {
             if (response && response.status === 200) {
+                let foundSelectedFolder = false;
                 let foldersList = response.result.items.map(
-                    item => ({
-                        id: item.id,
-                        title: item.title,
-                        updated: item.updated
-                    })
+                    item => {
+                        // check if the currently selected folder is still in the list
+                        if (that.state.selectedFolder && that.state.selectedFolder.id === item.id) {
+                            foundSelectedFolder = true;
+                        }
+
+                        return {
+                            id: item.id,
+                            title: item.title,
+                            updated: item.updated
+                        }
+                    }
                 );
+
                 that.setState({
                     folders: foldersList
                 });
 
-                if (!that.state.selectedFolder && foldersList && foldersList.length > 0) {
+                if ((!that.state.selectedFolder || !foundSelectedFolder) && foldersList && foldersList.length > 0) {
                     let selectedFolder = foldersList[0];
                     that.setState({
                         selectedFolder

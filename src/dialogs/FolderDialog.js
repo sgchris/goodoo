@@ -70,7 +70,6 @@ export default class FolderDialog extends React.Component {
     }
 
     handleCallback = event => {
-        console.log('handleCallback');
         event.preventDefault();
         
         this.setState({open: false});
@@ -79,7 +78,6 @@ export default class FolderDialog extends React.Component {
             let newData = {
                 title: this.state.title
             };
-            console.log('calling callback with ', newData);
             this.props.callback(newData);
         }
 

@@ -139,7 +139,6 @@ export default class TaskDialog extends React.Component {
                                             style={{marginRight: '10px'}} 
                                             onChange={
                                                 event => {
-                                                    console.log('is checked:', event.target.checked);
                                                     this.setState({addRemider: event.target.checked})
                                                 }
                                             }

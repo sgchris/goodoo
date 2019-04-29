@@ -3,7 +3,8 @@ import React, { Component } from 'react'
 import Grid from '@material-ui/core/Grid';
 import TasksList from './TasksList';
 import FoldersList from './FoldersList';
-import TaskDialog, { DIALOG_TYPES as TASK_DIALOG_TYPES } from './../dialogs/TaskDialog';
+// import TaskDialog, { DIALOG_TYPES as TASK_DIALOG_TYPES } from './../dialogs/TaskDialog';
+import TaskDialogService, { DIALOG_TYPES as TASK_DIALOG_TYPES } from './../dialogs/TaskDialogService';
 import FolderDialog, { DIALOG_TYPES as FOLDER_DIALOG_TYPES} from './../dialogs/FolderDialog';
 import Typography from '@material-ui/core/Typography';
 import Switch from '@material-ui/core/Switch';
@@ -333,6 +334,7 @@ class Todo extends Component {
         return (
             <div>
                 { /* Task Dialog (create/edit) */}
+                {/* 
                 { this.state.taskDialogType === TASK_DIALOG_TYPES.DIALOG_TYPE_CREATE ? (
                     <TaskDialog open={this.state.showTaskDialog} 
                         folderName={this.state.selectedFolder ? this.state.selectedFolder.title : ''}
@@ -351,6 +353,7 @@ class Todo extends Component {
                         onClose={this.onDialogClose}
                     />
                 )}
+                */}
 
                 { /* Folder Dialog (create/edit) */}
                 { this.state.folderDialogType === FOLDER_DIALOG_TYPES.DIALOG_TYPE_CREATE ? (

@@ -3,9 +3,9 @@ import React, { Component } from 'react'
 import Grid from '@material-ui/core/Grid';
 import TasksList from './TasksList';
 import FoldersList from './FoldersList';
-// import TaskDialog, { DIALOG_TYPES as TASK_DIALOG_TYPES } from './../dialogs/TaskDialog';
 import TaskDialogService, { DIALOG_TYPES as TASK_DIALOG_TYPES } from './../dialogs/TaskDialogService';
-import FolderDialog, { DIALOG_TYPES as FOLDER_DIALOG_TYPES} from './../dialogs/FolderDialog';
+// import FolderDialog, { DIALOG_TYPES as FOLDER_DIALOG_TYPES} from './../dialogs/FolderDialog';
+import FolderDialogService, { DIALOG_TYPES as FOLDER_DIALOG_TYPES} from './../dialogs/FolderDialogService';
 import Typography from '@material-ui/core/Typography';
 import Switch from '@material-ui/core/Switch';
 import Fab from '@material-ui/core/Fab';
@@ -46,10 +46,8 @@ class Todo extends Component {
         this.onFolderRenameClick = this.onFolderRenameClick.bind(this);
         this.folderUpdate = this.folderUpdate.bind(this);
 
-        this.onFolderCreate = this.onFolderCreate.bind(this);
+        this.folderCreate = this.folderCreate.bind(this);
         this.onFolderDelete = this.onFolderDelete.bind(this);
-
-        this.onDialogClose = this.onDialogClose.bind(this);
     }
 
     componentDidMount() {
@@ -132,7 +130,6 @@ class Todo extends Component {
     }
 
     onTaskClick(clickedTaskData) {
-        console.log('onTaskClick', {clickedTaskData});
         // find the selected task
         let selectedTask = this.state.tasks.reduce((prevTask, currentTask) => {
             return (currentTask.id === clickedTaskData.id) ? currentTask : prevTask;
@@ -187,13 +184,14 @@ class Todo extends Component {
         );
     }
 
-    onFolderCreate(newFolderData) {
-        // hide the dialog
-        this.setState({showFolderDialog: false})
-
+    /**
+     * Create new folder
+     * @param {String} title 
+     */
+    folderCreate(title) {
         // generate new resource
         const resource = {
-            title: newFolderData.title
+            title
         };
 
         window.gapi.client.tasks.tasklists.insert({
@@ -218,13 +216,11 @@ class Todo extends Component {
         );
     }
 
-    folderUpdate(folderData) {
-        // hide the dialog
-        this.setState({showFolderDialog: false});
+    folderUpdate(folderNewTitle) {
 
         // get the original folder object
         const resource = Object.assign({}, this.state.clickedFolder);
-        resource.title = folderData.title;
+        resource.title = folderNewTitle;
         
         window.gapi.client.tasks.tasklists.update({
             tasklist: this.state.clickedFolder.id,
@@ -297,69 +293,51 @@ class Todo extends Component {
         );
     }
 
-    onDialogClose = () => this.setState({
-        showTaskDialog: false,
-        showFolderDialog: false,
-    });
-
     render() {
         return (
             <div>
-                { /* Task Dialog (create/edit) */}
-                {/* 
-                { this.state.taskDialogType === TASK_DIALOG_TYPES.DIALOG_TYPE_CREATE ? (
-                    <TaskDialog open={this.state.showTaskDialog} 
-                        folderName={this.state.selectedFolder ? this.state.selectedFolder.title : ''}
-                        callback={this.onTaskCreate}
-                        onClose={this.onDialogClose}
-                    />
-                ) : (
-                    <TaskDialog open={this.state.showTaskDialog} 
-                        taskId={this.state.selectedTask ? this.state.selectedTask.id : ''}
-                        title={this.state.selectedTask ? this.state.selectedTask.title : ''}
-                        date={this.state.selectedTask ? this.state.selectedTask.due : ''}
-                        addRemider={this.state.selectedTask ? (!!this.state.selectedTask.due) : false}
-                        
-                        folderName={this.state.selectedFolder ? this.state.selectedFolder.title : ''}
-                        callback={this.taskUpdate}
-                        onClose={this.onDialogClose}
-                    />
-                )}
-                */}
-
                 { /* Folder Dialog (create/edit) */}
-                { this.state.folderDialogType === FOLDER_DIALOG_TYPES.DIALOG_TYPE_CREATE ? (
-                    <FolderDialog open={this.state.showFolderDialog} 
-                        callback={this.onFolderCreate}
-                        onClose={this.onDialogClose}
-                    />
-                ) : (
-                    <FolderDialog open={this.state.showFolderDialog} 
-                        title={this.state.clickedFolder ? this.state.clickedFolder.title : ''}
-                        callback={this.folderUpdate}
-                        onClose={this.onDialogClose}
-                    />
-                )}
                 <Grid container spacing={24}>
                     <Grid item xs={12} md={3}>
                         <Typography variant="title" color="inherit" style={{padding: '30px' }}>
                             Folders 
-                            <Fab size="small" color="secondary" 
-                                style={{marginLeft: '10px'}}
-                                aria-label="Add" 
-                                title="Add folder" 
-                                onClick={this.onAddFolderButtonClicked}
-                            >
-                                <AddIcon />
-                            </Fab>
+                            <FolderDialogService>{
+                                openFolderDialog => {
+                                    return (
+                                        <Fab size="small" color="secondary" 
+                                            style={{marginLeft: '10px'}}
+                                            aria-label="Add" 
+                                            title="Add folder" 
+                                            onClick={event => {
+                                                openFolderDialog(
+                                                    null, 
+                                                    newFolderName => this.folderCreate(newFolderName)
+                                                )
+                                            }}
+                                        >
+                                            <AddIcon />
+                                        </Fab>
+                                    )
+                                }
+                            }</FolderDialogService>
+                            
                         </Typography>
-                        <FoldersList folders={this.state.folders} 
-                            selectedFolderId={this.state.selectedFolder ? this.state.selectedFolder.id : null} 
-                            onFolderClick={this.onFolderClick} 
-                            onFolderDelete={this.onFolderDelete} 
-                            onFolderRename={this.onFolderRenameClick} 
-                            folderDelete={this.folderDelete} 
-                        />
+                        <FolderDialogService>{
+                            openFolderDialog => {
+                                return (
+                                    <FoldersList folders={this.state.folders} 
+                                        selectedFolderId={this.state.selectedFolder ? this.state.selectedFolder.id : null} 
+                                        onFolderClick={this.onFolderClick} 
+                                        onFolderDelete={this.onFolderDelete} 
+                                        onFolderRename={folderData => {
+                                            this.onFolderRenameClick(folderData);
+                                            openFolderDialog(folderData.title, folderNewTitle => this.folderUpdate(folderNewTitle))
+                                        }} 
+                                        folderDelete={this.folderDelete} 
+                                    />
+                                );
+                            }
+                        }</FolderDialogService>
                     </Grid>
                     { this.state.selectedFolder ? (
                         <Grid item xs={12} md={9}>

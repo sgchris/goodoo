@@ -13,19 +13,10 @@ import { MuiPickersUtilsProvider, TimePicker, DatePicker } from 'material-ui-pic
 import { Checkbox } from '@material-ui/core';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 
-import { Typography } from '@material-ui/core';
-
 export const DIALOG_TYPES = {
     DIALOG_TYPE_CREATE: 'dialog_type_create',
     DIALOG_TYPE_EDIT: 'dialog_type_edit',
 };
-
-const initialState = {
-    open: false,
-    addRemider: false,
-    date: new Date(),
-    title: '',
-}
 
 export default class TaskDialogService extends React.Component {
 
@@ -67,7 +58,7 @@ export default class TaskDialogService extends React.Component {
 
         // update internal params, and display the popup
         this.setState(
-            {callback, folderName, title, addRemider, due}, 
+            {type: dialogType, callback, folderName, title, addRemider, due}, 
             () => this.setState({
                 open: true,
                 callback

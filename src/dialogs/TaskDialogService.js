@@ -43,6 +43,15 @@ export default class TaskDialogService extends React.Component {
         callback: null
     };
 
+    constructor(props) {
+        super(props);
+
+        this.openTaskDialog = this.openTaskDialog.bind(this);
+        this.handleDateChange = this.handleDateChange.bind(this);
+        this.handleCallback = this.handleCallback.bind(this);
+        this.handleClose = this.handleClose.bind(this);
+    }
+
     openTaskDialog(folderName, title, due, callback) {
         if (!folderName) {
             console.error('Folder name must be provided TaskDialogService::openTaskDialog');
@@ -78,10 +87,12 @@ export default class TaskDialogService extends React.Component {
         });
 
         if (this.state.callback) {
-            this.state.callback(
-                this.state.title, 
-                this.state.due
-            );
+            let due = this.state.addRemider ? this.state.due : null;
+
+            if (due instanceof Date) {
+                due = due.toISOString();
+            }
+            this.state.callback(this.state.title, due);
         }
     }
     
@@ -163,4 +174,4 @@ export default class TaskDialogService extends React.Component {
             </React.Fragment>
         )
     }
-}date
+}

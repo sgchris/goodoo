@@ -39,7 +39,6 @@ class Todo extends Component {
 
         this.onTaskClick=this.onTaskClick.bind(this);
         this.taskUpdate=this.taskUpdate.bind(this);
-        this.onTaskCreate=this.onTaskCreate.bind(this);
         this.onMarkTaskComplete=this.onMarkTaskComplete.bind(this);
         this.onTaskDelete=this.onTaskDelete.bind(this);
         
@@ -125,13 +124,6 @@ class Todo extends Component {
         })
     }
 
-    onAddTaskButtonClicked = (event) => {
-        this.setState({
-            taskDialogType: TASK_DIALOG_TYPES.DIALOG_TYPE_CREATE,
-            showTaskDialog: true
-        })
-    }
-
     onAddFolderButtonClicked = (event) => {
         this.setState({
             folderDialogType: FOLDER_DIALOG_TYPES.DIALOG_TYPE_CREATE,
@@ -140,6 +132,7 @@ class Todo extends Component {
     }
 
     onTaskClick(clickedTaskData) {
+        console.log('onTaskClick', {clickedTaskData});
         // find the selected task
         let selectedTask = this.state.tasks.reduce((prevTask, currentTask) => {
             return (currentTask.id === clickedTaskData.id) ? currentTask : prevTask;
@@ -180,19 +173,10 @@ class Todo extends Component {
         })
     }
 
-    onTaskCreate(newTaskData) {
-        // hide the dialog
-        this.setState({showTaskDialog: false})
+    taskCreate(newTaskData) {
 
         // generate new resource
-        const resource = {
-            title: newTaskData.title,
-            status: "needsAction"
-        };
-
-        if (newTaskData.addRemider) {
-            resource.due = newTaskData.date;
-        }
+        const resource = Object.assign({}, {status: "needsAction"}, newTaskData);
 
         window.gapi.client.tasks.tasks.insert({
             tasklist: this.state.selectedFolder.id,
@@ -220,26 +204,14 @@ class Todo extends Component {
         );
     }
 
+    /**
+     * Update this function to send requests manually
+     */
     taskUpdate(taskData) {
-        // hide the dialog
-        this.setState({showTaskDialog: false});
-
-        // get the original task object
-        const resource = Object.assign({}, this.state.selectedTask);
-        resource.title = taskData.title;
-        resource.status = "needsAction";
-        if (taskData.addRemider) {
-            resource.due = taskData.date;
-        } else {
-            if ('due' in resource) {
-                delete resource.due;
-            }
-        }
-        
         window.gapi.client.tasks.tasks.update({
             tasklist: this.state.selectedFolder.id,
-            task: this.state.selectedTask.id, 
-            resource
+            task: taskData.id, 
+            resource: taskData
         }).then(
             response => this.getTasks(), 
             err => console.error("Execute error", err)
@@ -398,22 +370,73 @@ class Todo extends Component {
                             </div>
                             <Typography variant="title" color="inherit" style={{padding: '30px' }}>
                                 Folder: {this.state.selectedFolder.title} 
-                                <Fab size="small" color="secondary" 
-                                    style={{marginLeft: '10px'}}
-                                    aria-label="Add" 
-                                    title="Add task"
-                                    onClick={this.onAddTaskButtonClicked}
-                                >
-                                    <AddIcon />
-                                </Fab>
+                                <TaskDialogService>
+                                {openTaskDialog => {
+                                    return (
+                                        <Fab size="small" color="secondary" 
+                                            style={{marginLeft: '10px'}}
+                                            aria-label="Add" 
+                                            title="Add task"
+                                            onClick={
+                                                event => {
+                                                    const selectedFolderName = this.state.selectedFolder ? 
+                                                        this.state.selectedFolder.title : '';
+                                                    openTaskDialog(
+                                                        selectedFolderName, 
+                                                        false, // title
+                                                        false, // due
+                                                        (title, due) => {
+                                                            let newTaskData = { title };
+                                                            if (due) {
+                                                                newTaskData.due = due;
+                                                            }
+                                                            
+                                                            this.taskCreate(newTaskData);
+                                                        }
+                                                    );
+                                                }
+                                            }
+                                        >
+                                            <AddIcon />
+                                        </Fab>
+                                    );
+                                }}
+                                </TaskDialogService>
                             </Typography>
+                            <TaskDialogService>
+                                {openTaskDialog => {
+                                    return (
+                                        <TasksList 
+                                            tasks={this.state.tasks} 
+                                            onTaskClick={ 
+                                                clickedTaskData => {
+                                                    const selectedFolderName = this.state.selectedFolder ? 
+                                                        this.state.selectedFolder.title : '';
 
-                            <TasksList tasks={this.state.tasks} 
-                                onTaskClick={this.onTaskClick}
-                                onTaskCreate={this.onTaskCreate}
-                                onMarkTaskComplete={this.onMarkTaskComplete}
-                                onTaskDelete={this.onTaskDelete}
-                            />
+                                                    openTaskDialog(
+                                                        selectedFolderName, 
+                                                        clickedTaskData.title, 
+                                                        clickedTaskData.due,
+
+                                                        // on "update" clicked
+                                                        (title, due) => {
+                                                            clickedTaskData.title = title;
+                                                            clickedTaskData.due = due;
+                                                            if (!clickedTaskData.due) {
+                                                                delete clickedTaskData.due;
+                                                            }
+
+                                                            this.taskUpdate(clickedTaskData);
+                                                        }
+                                                    );
+                                                }
+                                            }
+                                            onMarkTaskComplete={this.onMarkTaskComplete}
+                                            onTaskDelete={this.onTaskDelete}
+                                        />
+                                    )
+                                }}
+                            </TaskDialogService>
                         </Grid>
                     ) : (
                         <Grid item xs={12} md={9}>No tasks list selected</Grid>

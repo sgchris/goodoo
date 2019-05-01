@@ -3,9 +3,8 @@ import React, { Component } from 'react'
 import Grid from '@material-ui/core/Grid';
 import TasksList from './TasksList';
 import FoldersList from './FoldersList';
-import TaskDialogService, { DIALOG_TYPES as TASK_DIALOG_TYPES } from './../dialogs/TaskDialogService';
-// import FolderDialog, { DIALOG_TYPES as FOLDER_DIALOG_TYPES} from './../dialogs/FolderDialog';
-import FolderDialogService, { DIALOG_TYPES as FOLDER_DIALOG_TYPES} from './../dialogs/FolderDialogService';
+import TaskDialogService from './../dialogs/TaskDialogService';
+import FolderDialogService from './../dialogs/FolderDialogService';
 import Typography from '@material-ui/core/Typography';
 import Switch from '@material-ui/core/Switch';
 import Fab from '@material-ui/core/Fab';
@@ -21,29 +20,17 @@ class Todo extends Component {
         
         // show completed tasks switch 
         // TODO: read from cookie
-        showCompleted: false,
-        
-        // task dialog related
-        showTaskDialog: false,
-        selectedTask: null,
-        taskDialogType: TASK_DIALOG_TYPES.DIALOG_TYPE_CREATE,
-
-        // folder dialog related
-        showFolderDialog: false,
-        folderDialogType: FOLDER_DIALOG_TYPES.DIALOG_TYPE_CREATE,
-        clickedFolder: null,
+        showCompleted: false,  
     };
 
     constructor(props) {
         super(props);
 
-        this.onTaskClick=this.onTaskClick.bind(this);
         this.taskUpdate=this.taskUpdate.bind(this);
         this.onMarkTaskComplete=this.onMarkTaskComplete.bind(this);
         this.onTaskDelete=this.onTaskDelete.bind(this);
         
         this.onFolderClick = this.onFolderClick.bind(this);
-        this.onFolderRenameClick = this.onFolderRenameClick.bind(this);
         this.folderUpdate = this.folderUpdate.bind(this);
 
         this.folderCreate = this.folderCreate.bind(this);
@@ -122,54 +109,6 @@ class Todo extends Component {
         })
     }
 
-    onAddFolderButtonClicked = (event) => {
-        this.setState({
-            folderDialogType: FOLDER_DIALOG_TYPES.DIALOG_TYPE_CREATE,
-            showFolderDialog: true
-        })
-    }
-
-    onTaskClick(clickedTaskData) {
-        // find the selected task
-        let selectedTask = this.state.tasks.reduce((prevTask, currentTask) => {
-            return (currentTask.id === clickedTaskData.id) ? currentTask : prevTask;
-        });
-        
-        let that = this;
-        this.setState({
-            selectedTask
-        }, () => {
-            that.setState({
-                taskDialogType: TASK_DIALOG_TYPES.DIALOG_TYPE_EDIT,
-            }, () => {
-                that.setState({
-                    showTaskDialog: true
-                });
-            });
-        })
-    }
-
-    // show the rename dialog
-    onFolderRenameClick(folderData) {
-        // find the selected task
-        let clickedFolder = this.state.folders.reduce((prevFolder, currentFolder) => {
-            return (currentFolder.id === folderData.id) ? currentFolder : prevFolder;
-        });
-        
-        let that = this;
-        this.setState({
-            clickedFolder
-        }, () => {
-            that.setState({
-                folderDialogType: FOLDER_DIALOG_TYPES.DIALOG_TYPE_EDIT,
-            }, () => {
-                that.setState({
-                    showFolderDialog: true
-                });
-            });
-        })
-    }
-
     taskCreate(newTaskData) {
 
         // generate new resource
@@ -216,14 +155,14 @@ class Todo extends Component {
         );
     }
 
-    folderUpdate(folderNewTitle) {
+    folderUpdate(folderData, folderNewTitle) {
 
         // get the original folder object
-        const resource = Object.assign({}, this.state.clickedFolder);
+        const resource = Object.assign({}, folderData);
         resource.title = folderNewTitle;
         
         window.gapi.client.tasks.tasklists.update({
-            tasklist: this.state.clickedFolder.id,
+            tasklist: folderData.id,
             resource
         }).then(
             response => this.getFolders(), 
@@ -330,8 +269,7 @@ class Todo extends Component {
                                         onFolderClick={this.onFolderClick} 
                                         onFolderDelete={this.onFolderDelete} 
                                         onFolderRename={folderData => {
-                                            this.onFolderRenameClick(folderData);
-                                            openFolderDialog(folderData.title, folderNewTitle => this.folderUpdate(folderNewTitle))
+                                            openFolderDialog(folderData.title, folderNewTitle => this.folderUpdate(folderData, folderNewTitle))
                                         }} 
                                         folderDelete={this.folderDelete} 
                                     />

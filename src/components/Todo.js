@@ -10,6 +10,8 @@ import Switch from '@material-ui/core/Switch';
 import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
 
+import axios from 'axios';
+
 class Todo extends Component {
 
     state = {
@@ -143,8 +145,26 @@ class Todo extends Component {
 
     /**
      * Update this function to send requests manually
+     * 
+     * The "due" time is always set to 00:00:00. A bug is open:
+     * https://issuetracker.google.com/issues/131802538
      */
     taskUpdate(taskData) {
+        const url = 'https://www.googleapis.com/tasks/v1/' + 
+            'lists/' + this.state.selectedFolder.id + '/tasks/' + taskData.id;
+        const accessToken = window.gapi.auth2.getAuthInstance().isSignedIn.get() ? 
+            window.gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token : 
+            null;
+        taskData.due=(new Date()).toISOString();
+        axios.put(url, taskData, {
+            headers: {
+                'Authorization': 'Bearer ' + accessToken
+            }
+        }).then(
+            response => this.getTasks(), 
+            err => console.error("Execute error", err)
+        );
+        /*
         window.gapi.client.tasks.tasks.update({
             tasklist: this.state.selectedFolder.id,
             task: taskData.id, 
@@ -153,6 +173,7 @@ class Todo extends Component {
             response => this.getTasks(), 
             err => console.error("Execute error", err)
         );
+        */
     }
 
     folderUpdate(folderData, folderNewTitle) {

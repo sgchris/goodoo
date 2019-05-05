@@ -7,6 +7,8 @@ import Button from '@material-ui/core/Button'
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Typography from '@material-ui/core/Typography';
 
+import { CookiesProvider } from 'react-cookie';
+
 class App extends Component {
     state = {
         // initial google auth status check
@@ -59,8 +61,11 @@ class App extends Component {
                     onLogout={this.googleAuthInstance.signOut.bind(this.googleAuthInstance)}
                 />
                 { this.state.isSignedIn 
-                    ? <Todo style={{ margin: 24 }} /> 
-                    : <Typography variant="title" color="inherit" style={{textAlign: 'center', padding: '30px' }}>
+                    ? (
+                        <CookiesProvider>
+                            <Todo style={{ margin: 24 }} />
+                        </CookiesProvider>
+                    ) : <Typography variant="title" color="inherit" style={{textAlign: 'center', padding: '30px' }}>
                         <Button variant="contained" color="primary" size="large"
                             onClick={this.googleAuthInstance.signIn.bind(this.googleAuthInstance)}>
                             <img alt="Google logo" src={process.env.PUBLIC_URL + '/google_logo.svg.png'} style={{height: '24px', width: '24px', marginRight: '10px'}} /> sign in

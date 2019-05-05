@@ -12,7 +12,14 @@ import AddIcon from '@material-ui/icons/Add';
 
 import axios from 'axios';
 
+import { instanceOf } from 'prop-types';
+import { withCookies, Cookies } from 'react-cookie';
+
 class Todo extends Component {
+    
+    static propTypes = {
+        cookies: instanceOf(Cookies).isRequired
+    };
 
     state = {
         selectedFolder: null,
@@ -20,13 +27,17 @@ class Todo extends Component {
         folders: [],
         tasks: [],
         
-        // show completed tasks switch 
-        // TODO: read from cookie
+        // show completed tasks switch
         showCompleted: false,  
     };
 
     constructor(props) {
         super(props);
+
+        this.cookies = props.cookies;
+
+
+        this.state.showCompleted = this.cookies.get('showCompleted') == '1' || false;
 
         this.taskUpdate=this.taskUpdate.bind(this);
         this.onMarkTaskComplete=this.onMarkTaskComplete.bind(this);
@@ -247,10 +258,17 @@ class Todo extends Component {
 
     // callback for the "show completed" switch
     onShowCompleted(showCompleted) {
+        if (showCompleted) {
+            this.cookies.set('showCompleted', '1');
+        } else {
+            this.cookies.remove('showCompleted');
+        }
+
         this.setState(
             {showCompleted},
             () => this.getTasks()
         );
+        
     }
 
     render() {
@@ -384,4 +402,4 @@ class Todo extends Component {
         )
     }
 }
-export default Todo;
+export default withCookies(Todo);
